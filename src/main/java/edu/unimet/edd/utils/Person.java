@@ -1,74 +1,184 @@
 package edu.unimet.edd.utils;
 
 /**
- * This class represents a person in a genealogical tree. A person has a name,
- * attributes, children, and fate.
+ * Represents a person in the genealogy tree.
  */
 public class Person {
 
     private String name;
-    private String[] attributes; // Array of attributes
-    private String[] children;    // Array of children names
+    private String title;
+    private String nickname;
+    private String father;
+    private String mother;
     private String fate;
+    private LinkedList children;
+    private String ofHisName;
 
     /**
-     * Constructs a new Person with the given details.
+     * Constructs a new Person object.
      *
      * @param name The name of the person.
-     * @param attributes The attributes of the person.
-     * @param children The children of the person.
-     * @param fate The fate of the person.
+     * @param title The title held by the person.
+     * @param nickname The nickname of the person.
+     * @param father The name of the person's father.
+     * @param mother The name of the person's mother.
+     * @param fate The fate or notes about the person.
+     * @param ofHisName The "Of his name" value for the person.
+     * @param children A list of the person's children.
      */
-    public Person(String name, String title, String alias, String father, String mother, String deathDate) {
+    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, LinkedList children) {
         this.name = name;
-        this.attributes = new String[]{title, alias};  // Combina title y alias como atributos
-        this.children = new String[0];  // Asignar un arreglo vacío si no tienes hijos
-        this.fate = deathDate;  // Utilizar deathDate como destino
+        this.title = title;
+        this.nickname = nickname;
+        this.father = father;
+        this.mother = mother;
+        this.fate = fate;
+        this.ofHisName = ofHisName;
+        this.children = children;
     }
 
     /**
-     * Returns the name of the person.
+     * Returns an iterator for the children list.
      *
-     * @return The name of the person.
+     * @return An iterator for the children list.
+     */
+    public PersonIterator iterator() {
+        return new PersonIterator();
+    }
+
+    /**
+     * Iterator for iterating over the children.
+     */
+    public class PersonIterator implements Iterator<String> {
+
+        private int currentIndex = 0;
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < children.size();
+        }
+
+        @Override
+        public String next() {
+            if (hasNext()) {
+                String child = children.get(currentIndex);
+                currentIndex++;
+                return child;
+            }
+            return null;
+        }
+    }
+
+    /**
+     * @return the name
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Returns the attributes of the person.
-     *
-     * @return An array of attributes.
+     * @param name the name to set
      */
-    public String[] getAttributes() {
-        return attributes;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
-     * Returns the children of the person.
-     *
-     * @return An array of children's names.
+     * @return the title
      */
-    public String[] getChildren() {
-        return children;
+    public String getTitle() {
+        return title;
     }
 
     /**
-     * Returns the fate of the person.
-     *
-     * @return The fate of the person.
+     * @param title the title to set
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * @return the nickname
+     */
+    public String getNickname() {
+        return nickname;
+    }
+
+    /**
+     * @param nickname the nickname to set
+     */
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    /**
+     * @return the father
+     */
+    public String getFather() {
+        return father;
+    }
+
+    /**
+     * @param father the father to set
+     */
+    public void setFather(String father) {
+        this.father = father;
+    }
+
+    /**
+     * @return the mother
+     */
+    public String getMother() {
+        return mother;
+    }
+
+    /**
+     * @param mother the mother to set
+     */
+    public void setMother(String mother) {
+        this.mother = mother;
+    }
+
+    /**
+     * @return the fate
      */
     public String getFate() {
         return fate;
     }
 
     /**
-     * Returns a string representation of the person.
-     *
-     * @return A string representing the person's name and attributes.
+     * @param fate the fate to set
      */
-    @Override
-    public String toString() {
-        return name + " - " + String.join(", ", attributes);
+    public void setFate(String fate) {
+        this.fate = fate;
     }
+
+    /**
+     * @return the children
+     */
+    public LinkedList getChildren() {
+        return children;
+    }
+
+    /**
+     * @param children the children to set
+     */
+    public void setChildren(LinkedList children) {
+        this.children = children;
+    }
+
+    /**
+     * @return the ofHisName
+     */
+    public String getOfHisName() {
+        return ofHisName;
+    }
+
+    /**
+     * @param ofHisName the ofHisName to set
+     */
+    public void setOfHisName(String ofHisName) {
+        this.ofHisName = ofHisName;
+    }
+
 }

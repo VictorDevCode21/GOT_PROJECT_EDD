@@ -1,97 +1,50 @@
 package edu.unimet.edd.utils;
 
-import edu.unimet.edd.utils.Person;
-
 /**
- * Represents a singly linked list to store Person objects. This list is used
- * for handling people in a genealogical tree.
+ * A simple implementation of a LinkedList. This class stores elements and
+ * allows access to them by index.
  */
 public class LinkedList {
 
-    private Node first; // First node of the list
-    private int size;
+    private Node head;  // Head node of the list
+    private int size;   // Size of the list
 
-    /**
-     * Constructs an empty LinkedList.
-     */
     public LinkedList() {
-        first = null;
-        size = 0;
+        this.head = null;
+        this.size = 0;
     }
 
     /**
-     * Returns the current size of the LinkedList.
+     * Adds a string to the linked list.
      *
-     * @return the number of elements in the list
+     * @param value The string value to add to the list.
      */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * Adds a new Person to the end of the LinkedList.
-     *
-     * @param person the Person to be added to the list
-     */
-    public void add(Person person) {
-        Node node = new Node(person);
-        if (size == 0) { // Empty list
-            first = node;
-        } else { // Non-empty list
-            Node aux = first;
-            while (aux.getNext() != null) {
-                aux = aux.getNext();
+    public void addString(String value) {
+        Node newNode = new Node(value);
+        if (head == null) {
+            head = newNode;
+        } else {
+            Node current = head;
+            while (current.getNext() != null) {
+                current = current.getNext();
             }
-            aux.setNext(node);
+            current.setNext(newNode);
         }
         size++;
     }
 
     /**
-     * Removes and returns the first element of the LinkedList.
+     * Returns the element at the specified index.
      *
-     * @return the removed Person
-     * @throws IllegalStateException if the list is empty
+     * @param index The index of the element to retrieve.
+     * @return The element at the specified index.
      */
-    public Person removeFirst() {
-        if (size == 0) {
-            throw new IllegalStateException("Cannot remove from an empty list");
-        }
-        Person value = first.getValue();
-        first = first.getNext();
-        size--;
-        return value;
-    }
-
-    /**
-     * Checks if the LinkedList contains the given Person.
-     *
-     * @param person the Person to search for
-     * @return true if the Person exists in the list, false otherwise
-     */
-    public boolean contains(Person person) {
-        Node current = first;
-        while (current != null) {
-            if (current.getValue().equals(person)) {
-                return true;
-            }
-            current = current.getNext();
-        }
-        return false;
-    }
-
-    /**
-     * Returns the Person at the specified index in the LinkedList.
-     *
-     * @param index the index of the Person to retrieve
-     * @return the Person at the given index
-     * @throws IndexOutOfBoundsException if the index is out of bounds
-     */
-    public Person get(int index) {
+    public String get(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new IndexOutOfBoundsException("Index out of bounds");
         }
-        Node current = first;
+
+        Node current = head;
         for (int i = 0; i < index; i++) {
             current = current.getNext();
         }
@@ -99,23 +52,96 @@ public class LinkedList {
     }
 
     /**
-     * Returns the first node in the LinkedList.
+     * Returns the size of the linked list.
      *
-     * @return the first node
+     * @return The size of the list.
      */
-    public Node getFirstNode() {
-        return first;
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+
     }
 
     /**
-     * Prints all elements of the LinkedList in order.
+     * Returns an iterator for this LinkedList.
+     *
+     * @return A new iterator for the list.
      */
-    public void print() {
-        Node current = first;
-        while (current != null) {
-            System.out.print(current.getValue().getName() + " -> ");
-            current = current.getNext();
+    public LinkedListIterator iterator() {
+        return new LinkedListIterator();
+    }
+
+    /**
+     * Iterator class for LinkedList.
+     */
+    public class LinkedListIterator implements Iterator<String> {
+
+        private Node current;
+
+        public LinkedListIterator() {
+            this.current = head;
         }
-        System.out.println("null");
+
+        /**
+         * Checks if there is a next element in the list.
+         *
+         * @return True if there is a next element, false otherwise.
+         */
+        @Override
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        /**
+         * Returns the next element in the list.
+         *
+         * @return The next element in the list.
+         */
+        @Override
+        public String next() {
+            if (!hasNext()) {
+                throw new IllegalStateException("No more elements in the list");
+            }
+            String value = current.getValue();
+            current = current.getNext();
+            return value;
+        }
+    }
+
+    /**
+     * A Node class to represent each element in the LinkedList.
+     */
+    private class Node {
+
+        private String value;
+        private Node next;
+
+        public Node(String value) {
+            this.value = value;
+            this.next = null;
+        }
+
+        // Getter for the value of the node
+        public String getValue() {
+            return value;
+        }
+
+        // Setter for the value of the node
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        // Getter for the next node
+        public Node getNext() {
+            return next;
+        }
+
+        // Setter for the next node
+        public void setNext(Node next) {
+            this.next = next;
+        }
     }
 }

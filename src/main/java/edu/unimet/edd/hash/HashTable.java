@@ -50,14 +50,11 @@ public class HashTable {
         int index = getIndex(key);
         LinkedList bucket = table[index];
 
-        // If key exists, update it; otherwise, add a new entry
-        if (bucket.containsKey(key)) {
-            // Here we could call bucket.remove(key) if we wanted to avoid duplicates,
-            // but for now, we assume that the user doesn't want to store duplicate keys.
+        // Avoid duplicates: If key exists, update the existing entry
+        if (!bucket.containsKey(key)) {
+            bucket.add(key, value);  // Only add if key does not already exist
+            size++;
         }
-
-        bucket.add(key, value);
-        size++;
     }
 
     /**
@@ -136,4 +133,90 @@ public class HashTable {
     public int size() {
         return size;
     }
+
+    /**
+     * Retrieves all people stored in the hash table.
+     *
+     * @return An array of Person objects stored in the table.
+     */
+    public Person[] getAllPeople() {
+        // Calcular el tamaño total necesario
+        int totalPeople = 0;
+        for (LinkedList bucket : table) {
+            if (bucket != null) {
+                totalPeople += bucket.getSize(); // Contar elementos en cada bucket
+            }
+        }
+
+        // Crear un arreglo estático del tamaño necesario
+        Person[] peopleArray = new Person[totalPeople];
+
+        // Llenar el arreglo con las personas de la tabla hash
+        int index = 0;
+        for (LinkedList bucket : table) {
+            if (bucket != null) {
+                Node current = bucket.getFirstNode();
+                while (current != null) {
+                    peopleArray[index++] = current.getValue().getValue(); // Agregar Persona al arreglo
+                    current = current.getNext();
+                }
+            }
+        }
+
+        return peopleArray;
+    }
+
+    /**
+     * Returns an array of all values in the HashTable.
+     *
+     * @return An array of all values stored in the HashTable.
+     */
+    public Person[] values() {
+        Person[] values = new Person[size]; // Create an array to store all values
+        int index = 0;
+
+        // Iterate through each bucket in the hash table
+        for (LinkedList bucket : table) {
+            if (bucket != null) { // Check if the bucket is not null
+                Node current = bucket.getFirstNode(); // Get the first node of the bucket
+                while (current != null) {
+                    values[index++] = current.getValue().getValue(); // Add the Person value to the array
+                    current = current.getNext(); // Move to the next node in the list
+                }
+            }
+        }
+
+        return values; // Return the array of values
+    }
+
+    /**
+     * Retrieves all keys stored in the hash table.
+     *
+     * @return An array of keys stored in the hash table.
+     */
+    public String[] getKeys() {
+        // Create an array to store the keys
+        String[] keys = new String[size];
+        int index = 0;
+
+        // Iterate through each bucket in the table
+        for (LinkedList bucket : table) {
+            if (bucket != null) { // Check if the bucket is not null
+                Node current = bucket.getFirstNode(); // Get the first node of the bucket
+                while (current != null) {
+                    keys[index++] = current.getValue().getKey(); // Add the key to the array
+                    current = current.getNext(); // Move to the next node in the list
+                }
+            }
+        }
+
+        return keys; // Return the array of keys
+    }
+
+//    public void printTableContents() {
+//        System.out.println("HashTable contents:");
+//        for (Person person : table.getAllPeople()) {
+//            System.out.println("- " + person.getName());
+//        }
+//    }
 }

@@ -1,77 +1,164 @@
 package edu.unimet.edd.utils;
 
+import edu.unimet.edd.tree.Tree;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 /**
- * Loads a JSON file and adds the data to a LinkedList of Person objects.
+ * Utility class to load genealogy data from a JSON string.
  */
 public class LoadJson {
 
-    private LinkedList peopleList;
-
-    public LoadJson() {
-        // Inicializamos la LinkedList vacía
-        peopleList = new LinkedList();
-    }
-
     /**
-     * Loads data from the provided JSON file and stores each person in the
-     * LinkedList.
+     * Loads the genealogy data from the given JSON string and populates the
+     * tree.
      *
-     * @param filePath the path to the JSON file
-     * @throws FileNotFoundException if the file is not found
+     * @param jsonContent The JSON content containing genealogy data.
+     * @param tree The tree to populate with the genealogy data.
      */
-    public void load(String filePath) throws FileNotFoundException {
-        // Leemos el archivo JSON
-        File file = new File(filePath);
-        Scanner scanner = new Scanner(file);
-        StringBuilder jsonContent = new StringBuilder();
+    public void loadGenealogy(String jsonContent, Tree tree) {
+        JSONObject jsonObject = new JSONObject(jsonContent);
 
-        // Cargamos todo el contenido del archivo
-        while (scanner.hasNextLine()) {
-            jsonContent.append(scanner.nextLine());
+        // Parse each house and its members
+        for (String houseName : jsonObject.keySet()) {
+            JSONArray houseArray = jsonObject.getJSONArray(houseName);
+
+            // Load each person from the house
+            for (int i = 0; i < houseArray.length(); i++) {
+                JSONObject personEntry = houseArray.getJSONObject(i);
+
+                String personName = personEntry.keys().next();
+                JSONArray personDetails = personEntry.getJSONArray(personName);
+
+                // Parse and add the person to the tree
+                Person person = parsePersonDetails(personName, personDetails);
+                tree.addPerson(person); // Add person to the tree
+            }
         }
-        scanner.close();
 
-        // Convertimos el contenido del archivo a un objeto JSON
-        JSONObject jsonObject = new JSONObject(jsonContent.toString());
+        // Establish parent-child relationships after all people are added
+        for (String houseName : jsonObject.keySet()) {
+            JSONArray houseArray = jsonObject.getJSONArray(houseName);
 
-        // Aquí asumo que los datos de las personas están en un array llamado "people"
-        JSONArray peopleArray = jsonObject.getJSONArray("people");
+            for (int i = 0; i < houseArray.length(); i++) {
+                JSONObject personEntry = houseArray.getJSONObject(i);
 
-        // Iteramos sobre el array y agregamos las personas a la LinkedList
-        for (int i = 0; i < peopleArray.length(); i++) {
-            JSONObject personJson = peopleArray.getJSONObject(i);
+                String personName = personEntry.keys().next();
+                JSONArray personDetails = personEntry.getJSONArray(personName);
 
-            // Creamos un objeto Person a partir de los datos del JSON
-            String name = personJson.getString("name");
-            String title = personJson.optString("title", ""); // Título opcional
-            String alias = personJson.optString("alias", ""); // Alias opcional
-            String father = personJson.optString("father", null); // Padre opcional
-            String mother = personJson.optString("mother", null); // Madre opcional
-            String deathDate = personJson.optString("death_date", null); // Fecha de muerte opcional
-
-            // Creamos la persona
-            Person person = new Person(name, title, alias, father, mother, deathDate);
-
-            // Agregamos la persona a la LinkedList
-            peopleList.add(person);
+                // Link parents and children within the tree
+                linkRelationships(tree, personName, personDetails);
+            }
         }
     }
 
     /**
-     * Prints the list of people stored in the LinkedList.
+     * Links the relationships (parent-child) in the tree after all persons are
+     * loaded.
+     *
+     * @param tree The Tree object containing all persons.
+     * @param personName The name of the person.
+     * @param personDetails The JSON array containing the person's details.
      */
-    public void printPeople() {
-        peopleList.print();
+    private void linkRelationships(Tree tree, String personName, JSONArray personDetails) {
+        Person person = tree.getPerson(personName);
+        if (person == null) {
+            return;
+        }
+
+        for (int i = 0; i < personDetails.length(); i++) {
+            JSONObject detail = personDetails.getJSONObject(i);
+            String key = detail.keys().next();
+
+            if ("Father to".equals(key)) {
+                JSONArray childrenArray = detail.getJSONArray(key);
+                for (int j = 0; j < childrenArray.length(); j++) {
+                    String childName = childrenArray.getString(j);
+                    Person child = tree.getPerson(childName);
+                    if (child != null) {
+                        // Set father for each child
+                        child.setFather(personName);
+                    }
+                }
+            }
+        }
     }
 
-    // Getter para obtener la LinkedList si es necesario
-    public LinkedList getPeopleList() {
-        return peopleList;
+    /**
+     * Parses the details of a person from the given JSON array.
+     *
+     * @param name The name of the person.
+     * @param personDetails The JSON array containing the person's details.
+     * @return A Person object with the parsed data.
+     */
+    private Person parsePersonDetails(String name, JSONArray personDetails) {
+        String title = null;
+        String nickname = null;
+        String father = null;
+        String mother = null;
+        String fate = null;
+        String ofHisName = null;
+        LinkedList children = new LinkedList();
+
+        for (int i = 0; i < personDetails.length(); i++) {
+            JSONObject detail = personDetails.getJSONObject(i);
+            String key = detail.keys().next();
+            Object value = detail.get(key);
+
+            switch (key) {
+                case "Held title":
+                    title = (String) value;
+                    break;
+                case "Known throughout as":
+                    nickname = (String) value;
+                    break;
+                case "Born to":
+                    if (father == null) {
+                        father = (String) value;
+                    } else {
+                        mother = (String) value;
+                    }
+                    break;
+                case "Father to":
+                    if (value instanceof JSONArray) {
+                        JSONArray childrenArray = (JSONArray) value;
+                        for (int j = 0; j < childrenArray.length(); j++) {
+                            String childName = childrenArray.getString(j);
+                            // Use iterator to check for duplicates in children
+                            if (!isChildPresent(children, childName)) {
+                                children.addString(childName);
+                            }
+                        }
+                    }
+                    break;
+                case "Fate":
+                    fate = (String) value;
+                    break;
+                case "Of his name":
+                    ofHisName = (String) value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return new Person(name, title, nickname, father, mother, fate, ofHisName, children);
+    }
+
+    /**
+     * Checks if a child is present in the list of children.
+     *
+     * @param children The list of children.
+     * @param childName The name of the child to check.
+     * @return True if the child is present, false otherwise.
+     */
+    private boolean isChildPresent(LinkedList children, String childName) {
+        LinkedList.LinkedListIterator iterator = children.iterator(); // Use the correct iterator type
+        while (iterator.hasNext()) {
+            if (iterator.next().equals(childName)) {
+                return true; // Child is already in the list
+            }
+        }
+        return false; // Child is not in the list
     }
 }
