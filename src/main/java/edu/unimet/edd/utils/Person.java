@@ -181,4 +181,39 @@ public class Person {
         this.ofHisName = ofHisName;
     }
 
+    /**
+     * Updates the data of this Person object with new data from another Person
+     * object. Only non-null and non-empty fields in the new Person are used for
+     * the update.
+     *
+     * @param newPerson The Person object containing new data to update this
+     * object.
+     */
+    public void updateData(Person newPerson) {
+        if (!newPerson.getName().isEmpty()) {
+            this.name = newPerson.getName();
+        }
+        if (newPerson.getTitle() != null && !newPerson.getTitle().isEmpty()) {
+            this.title = newPerson.getTitle();
+        }
+        if (newPerson.getNickname() != null && !newPerson.getNickname().isEmpty()) {
+            this.nickname = newPerson.getNickname();
+        }
+        if (newPerson.getFather() != null && !newPerson.getFather().isEmpty()) {
+            this.father = newPerson.getFather();
+        }
+        if (newPerson.getMother() != null && !newPerson.getMother().isEmpty()) {
+            this.mother = newPerson.getMother();
+        }
+        if (newPerson.getFate() != null && !newPerson.getFate().isEmpty()) {
+            this.fate = newPerson.getFate();
+        }
+        if (newPerson.getOfHisName() != null && !newPerson.getOfHisName().isEmpty()) {
+            this.ofHisName = newPerson.getOfHisName();
+        }
+        if (newPerson.getChildren() != null && newPerson.getChildren().size() > 0) {
+            this.children = newPerson.getChildren();
+        }
+    }
+
 }
