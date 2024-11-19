@@ -34,6 +34,25 @@ public class LinkedList {
     }
 
     /**
+     * Adds a Person to the linked list.
+     *
+     * @param person The Person object to add to the list.
+     */
+    public void addPerson(Person person) {
+        Node newNode = new Node(person.getName()); // Use the name of the person as the value for the node.
+        if (head == null) {
+            head = newNode;
+        } else {
+            Node current = head;
+            while (current.getNext() != null) {
+                current = current.getNext();
+            }
+            current.setNext(newNode);
+        }
+        size++;
+    }
+
+    /**
      * Returns the element at the specified index.
      *
      * @param index The index of the element to retrieve.
