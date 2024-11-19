@@ -19,6 +19,8 @@ public class GenealogyGUI extends JFrame {
     private Tree tree;
     private JPanel graphPanel;
     private Viewer viewer;
+    private JTextField searchField;
+    private JButton searchButton;
 
     public GenealogyGUI() {
         // Initialize the tree and other components
@@ -40,8 +42,20 @@ public class GenealogyGUI extends JFrame {
         JButton loadButton = new JButton("Load Tree");
         loadButton.addActionListener(e -> loadTree());  // Action listener for the button
         controlsPanel.add(loadButton);
+        
+        // Adding search components
+        searchField = new JTextField(20); // Create the search text field
+        searchButton = new JButton("Search"); // Create the search button
+
+        // Add the search components to the controls panel
+        controlsPanel.add(new JLabel("Search Name:"));
+        controlsPanel.add(searchField);
+        controlsPanel.add(searchButton);
 
         add(controlsPanel, BorderLayout.SOUTH);
+        
+        // Search button action
+        searchButton.addActionListener(e -> searchPerson());
     }
 
     /**
@@ -71,6 +85,42 @@ public class GenealogyGUI extends JFrame {
             }
         }
     }
+    
+    
+/**
+ * Searches for a person by name and displays the result.
+ */
+private void searchPerson() {
+    try {
+        // Retrieve the name entered in the search field, trimming extra spaces.
+        String nameToSearch = searchField.getText().trim(); 
+        
+        // Search for the person in the tree using the name provided.
+        Person foundPerson = tree.SearchTest(nameToSearch); 
+
+        if (foundPerson != null) {
+            // If the person is found, build a string containing their details.
+            String personDetails = "Name: " + foundPerson.getName() + "\n"
+                                 + "Title: " + (foundPerson.getTitle() != null ? foundPerson.getTitle() : "N/A") + "\n"
+                                 + "Father: " + (foundPerson.getFather() != null && !foundPerson.getFather().isEmpty() ? foundPerson.getFather() : "N/A") + "\n"
+                                 + "Mother: " + (foundPerson.getMother() != null && !foundPerson.getMother().isEmpty() ? foundPerson.getMother() : "N/A") + "\n"
+                                 + "Fate: " + (foundPerson.getFate() != null ? foundPerson.getFate() : "N/A") + "\n";
+
+            // Display the person's details in a popup dialog.
+            JOptionPane.showMessageDialog(this, personDetails, "Person Information", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // If the person is not found, show an error message dialog.
+            JOptionPane.showMessageDialog(this, "Person not found.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (Exception e) {
+        // If an exception occurs, display an error message with the exception details.
+        JOptionPane.showMessageDialog(this, "An error occurred while searching for the person: " + e.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        // Print the stack trace for debugging purposes.
+        e.printStackTrace();}
+}
+  
+    
 
     /**
      * Updates the graph display with the current genealogy tree.
