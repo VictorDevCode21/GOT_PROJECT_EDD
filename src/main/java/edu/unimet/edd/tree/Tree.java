@@ -6,7 +6,6 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import edu.unimet.edd.hash.HashTable;
 import org.graphstream.graph.Node;
-import org.graphstream.graph.Edge;
 
 /**
  * The Tree class represents the genealogy tree, storing people and their
@@ -43,51 +42,79 @@ public class Tree {
 //     */
     public void addPerson(Person person) {
         // Generate all possible unique identifiers for this person
-        String fullNameKey = normalizeName(getFullName(person));
+        String fullNameKey = normalizeName(person.getName());
         String nicknameKey = person.getNickname() != null ? normalizeName(person.getNickname()) : null;
 
         // Debugging output to check the keys
-        System.out.println("Adding person with full name key: " + fullNameKey + " and nickname key: " + nicknameKey);
-
+//        System.out.println("Adding person with full name key: " + fullNameKey + " and nickname key: " + nicknameKey);
         // Check if this person already exists using any key
         if ((fullNameKey != null && table.get(fullNameKey) != null)
                 || (nicknameKey != null && table.get(nicknameKey) != null)) {
             // If the person exists, do not add duplicates
-            System.out.println("Duplicate found, not adding: " + person.getName());
+//            System.out.println("Duplicate found, not adding: " + person.getName());
             return;
+        }
+
+        // Check if the person has a father
+        if (person.getFather() != null) {
+            // Get the father's normalized name
+            String fatherName = normalizeName(person.getFather());
+
+            // Try to find the father in the HashTable
+            Person father = table.get(fatherName);
+
+            // If the father exists, check for duplicate children
+            if (father != null) {
+                // Remove duplicates and then add the child
+                String duplicatedChildName = person.checkDuplicateChild(father, person.getName(), table);
+
+                if (duplicatedChildName != null) {
+//                    if (table.get(duplicatedChildName) == null)
+//                        System.out.println("No coincidences for the child");
+                    Boolean deleted = table.remove(duplicatedChildName);
+//                    if (deleted == true)
+//                        System.out.println("Child eliminated: " + duplicatedChildName);
+                    
+                    
+
+                    // Check if the duplicate child was removed
+//                    if (table.get(duplicatedChildName) == null) {
+//                        System.out.println("Successfully removed duplicated child: " + duplicatedChildName);
+//                    } else {
+//                        System.out.println("Failed to remove duplicated child: " + duplicatedChildName);
+//                    }
+
+                    // Ensure the father does not reference the removed child
+                    father.getChildren().remove(duplicatedChildName);
+//                    if (father.getChildren().get(duplicatedChildName) != null)
+//                        System.out.println("Child's not in the list" + duplicatedChildName);
+                }
+
+                // Now add the current person as a child of the father
+                if (table.get(duplicatedChildName) == null || !duplicatedChildName.equalsIgnoreCase(person.getName())) {
+//                    System.out.println("added: " + person.getName());
+                    father.getChildren().addString(person.getName());
+                    
+                }
+
+            } else {
+//                System.out.println("Father " + fatherName + " not found in the HashTable.");
+            }
         }
 
         // Add the person using all possible keys
         addPersonToHashTable(person, fullNameKey, nicknameKey);
-        // Debugging output to show successful addition
-        System.out.println("Successfully added person: " + person.getName());
 
-        // Print a list of all people in the HashTable after the addition
-        System.out.println("Current list of people in the HashTable:");
-        for (Person storedPerson : table.getAllPeople()) {
-            System.out.println("- Name: " + storedPerson.getName());
-        }
-        System.out.println("====================================");
-
-        //          Print all people in the HashTable
-//        System.out.println("Current contents of the HashTable:");
-//        System.out.println("Current contents of the HashTable:");
-//        Person[] people = table.getAllPeople(); // Use getAllPeople to retrieve stored persons
-//        for (Person p : people) {
-//            String father = (p.getFather() != null) ? p.getFather() : "No father registered";
-//            System.out.println("- Name: " + p.getName() + ", Father: " + father);
-//
-//            // Print the children of this person
-//            LinkedList children2 = p.getChildren();
-//            if (children2 != null && children2.size() > 0) {
-//                System.out.println("  Children:");
-//                for (int i = 0; i < children2.size(); i++) {
-//                    System.out.println("    - " + children2.get(i));
-//                }
-//            } else {
-//                System.out.println("  No children registered.");
+        // Debugging output: print the list of people in the HashTable
+//        System.out.print("Lista de personas despues del metodo: [");
+//        Person[] allPeople = table.getAllPeople();
+//        for (int i = 0; i < allPeople.length; i++) {
+//            System.out.print(allPeople[i].getName().toLowerCase());
+//            if (i < allPeople.length - 1) {
+//                System.out.print(", ");
 //            }
-//        }   
+//        }
+//        System.out.println("]");
     }
 
     /**
@@ -109,15 +136,15 @@ public class Tree {
             // Add the node if it does not exist
             if (graph.getNode(personName) == null) {
                 graph.addNode(personName).setAttribute("ui.label", person.getName());
-                System.out.println("Added person to graph: " + person.getName());
+//                System.out.println("Added person to graph: " + person.getName());
             }
         }
 
         // Print the nicknames of all people in the HashTable (if not null)
-        System.out.println("Nicknames of people in the HashTable:");
+//        System.out.println("Nicknames of people in the HashTable:");
         for (Person person : table.getAllPeople()) {
             if (person.getNickname() != null) {
-                System.out.println(" - " + person.getNickname());
+//                System.out.println(" - " + person.getNickname());
             }
         }
 
@@ -193,62 +220,6 @@ public class Tree {
         return parts[0] + " " + parts[1]; // Return the first and second word
     }
 
-    /**
-     * Checks if a child is already in the list of a parent's children using
-     * their first name. Logs the current list of children for a parent and
-     * whether a duplicate was found.
-     *
-     * @param parent The parent Person object.
-     * @param childName The name of the child being added.
-     * @return True if the child is considered a duplicate, false otherwise.
-     */
-    private boolean checkDuplicateChild(Person parent, String childName) {
-        // Log the child being added
-//        System.out.println("Attempting to add child: " + childName);
-
-        if (parent != null) {
-            // Get the list of children for the parent
-            LinkedList currentChildren = parent.getChildren();
-
-            // Log the current list of children
-//            System.out.println("Current list of children for " + parent.getName() + ":");
-            if (currentChildren != null && currentChildren.size() > 0) {
-                String newChildFirstName = getFirstName(childName);
-                for (int i = 0; i < currentChildren.size(); i++) {
-                    String existingChildFirstName = getFirstName(currentChildren.get(i));
-
-                    // Log each child's first name
-//                    System.out.println("- " + currentChildren.get(i) + " (First Name: " + existingChildFirstName + ")");
-                    // Check for a duplicate based on first name
-                    if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
-//                        System.out.println("Duplicate child detected: " + childName);
-                        return true; // Duplicate found
-                    }
-                }
-            } else {
-//                System.out.println("- No children registered yet.");
-            }
-        } else {
-//            System.out.println("Parent object is null.");
-        }
-
-        // No duplicate found
-        return false;
-    }
-
-    /**
-     * Extracts the first name from a full name.
-     *
-     * @param name The full name.
-     * @return The first name.
-     */
-    private String getFirstName(String name) {
-        if (name == null || name.isEmpty()) {
-            return "";
-        }
-        String[] parts = name.split(" ");
-        return parts[0]; // Return the first part before any space
-    }
 
     /**
      * Adds a person to the hash table using multiple keys.
@@ -264,21 +235,6 @@ public class Tree {
         if (nicknameKey != null) {
             table.put(nicknameKey, person);
         }
-    }
-
-    /**
-     * Generates the full name of a person, including the "Of his name"
-     * attribute if present, and appends "of his name".
-     *
-     * @param person The Person object whose full name is to be generated.
-     * @return The full name of the person.
-     */
-    private String getFullName(Person person) {
-        String name = person.getName();
-        if (person.getOfHisName() != null) {
-            name += " " + person.getOfHisName() + " of his name"; // Add "Of his name" if available
-        }
-        return name;
     }
 
     /**

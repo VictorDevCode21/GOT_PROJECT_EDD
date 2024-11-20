@@ -1,6 +1,8 @@
 package edu.unimet.edd.hash;
 
 import edu.unimet.edd.utils.Person;
+import edu.unimet.edd.tree.Tree;
+import edu.unimet.edd.utils.LoadJson;
 
 /**
  * HashTable class that implements a hash table using chaining for collision
@@ -13,6 +15,7 @@ public class HashTable {
     private LinkedList[] table; // Array of LinkedLists to store entries
     private int size; // Current size of the table
     private double loadFactor; // Load factor for resizing
+//    private ListenerLinkedList listeners;
 
     /**
      * Constructor to initialize the hash table with default capacity.
@@ -30,10 +33,14 @@ public class HashTable {
         this.table = new LinkedList[capacity];
         this.size = 0;
         this.loadFactor = 0.75; // Default load factor
+//        this.listeners = new ListenerLinkedList(); // Initialize listeners list
         for (int i = 0; i < capacity; i++) {
             table[i] = new LinkedList(); // Initialize each bucket with an empty LinkedList
         }
+
     }
+
+
 
     /**
      * Method to insert a key-value pair into the hash table. If the key already
@@ -211,6 +218,29 @@ public class HashTable {
         }
 
         return keys; // Return the array of keys
+    }
+
+    /**
+     * Method to remove a person by key from the hash table.
+     *
+     * @param key The key of the entry to remove.
+     * @return True if the entry was removed, false otherwise.
+     */
+    public boolean remove(String key) {
+        int index = getIndex(key);
+        LinkedList bucket = table[index];
+        Node current = bucket.getFirstNode();
+        while (current != null) {
+            if (current.getValue().getKey().equals(key)) {
+                Person removedValue = current.getValue().getValue();
+                bucket.remove(current.getValue().getKey()); // Remove node with the key
+                size--;
+
+                return true;
+            }
+            current = current.getNext();
+        }
+        return false; // Key not found
     }
 
 //    public void printTableContents() {

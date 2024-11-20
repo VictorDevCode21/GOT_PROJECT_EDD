@@ -85,6 +85,58 @@ public class LinkedList {
     }
 
     /**
+     * Retrieves an element from the linked list based on its value.
+     *
+     * @param value The string value to search for.
+     * @return The value if found, otherwise null.
+     */
+    public String get(String value) {
+        Node current = head;
+        while (current != null) {
+            if (current.getValue().equals(value)) {
+                return current.getValue();
+            }
+            current = current.getNext();
+        }
+        // If the value is not found, return null
+        return null;
+    }
+
+    /**
+     * Removes the first occurrence of a specified value from the LinkedList.
+     *
+     * @param value The value to remove from the list.
+     * @return true if the value was found and removed, false otherwise.
+     */
+    public boolean remove(String value) {
+        if (head == null) {
+            return false; // List is empty, nothing to remove
+        }
+
+        // Special case: the value to remove is at the head of the list
+        if (head.getValue().equals(value)) {
+            head = head.getNext(); // Move head to the next node
+            size--;
+            return true;
+        }
+
+        // Traverse the list to find the node to remove
+        Node current = head;
+        while (current.getNext() != null) {
+            if (current.getNext().getValue().equals(value)) {
+                // Found the node, remove it by skipping it
+                current.setNext(current.getNext().getNext());
+                size--;
+                return true;
+            }
+            current = current.getNext();
+        }
+
+        // If we reach here, the value was not found
+        return false;
+    }
+
+    /**
      * Returns an iterator for this LinkedList.
      *
      * @return A new iterator for the list.

@@ -34,7 +34,7 @@ public class LoadJson {
 //                // Normalize the name before passing it to parsePersonDetails
 //                personName = normalizeName(personName);  // Normalizing the person's name
                 // Parse and add the person to the tree
-                Person person = parsePersonDetails(personName, personDetails);
+                Person person = parsePersonDetails(personName, personDetails, tree);
 //                System.out.println("Adding person: " + person.getName());
 //                System.out.println("Adding person: " + personName);
                 tree.addPerson(person);
@@ -49,7 +49,7 @@ public class LoadJson {
      * @param personDetails The JSON array containing the person's details.
      * @return A Person object with the parsed data.
      */
-    private Person parsePersonDetails(String name, JSONArray personDetails) {
+    private Person parsePersonDetails(String name, JSONArray personDetails, Tree tree) {
         String title = null;
         String nickname = null;
         String father = null;
@@ -85,10 +85,17 @@ public class LoadJson {
                         for (int j = 0; j < childrenArray.length(); j++) {
                             String childName = childrenArray.getString(j);
                             // Check for duplicates using isChildPresent
-//                            if (!isChildPresent(tempParent, childName)) {
-//                                System.out.println("Hola maldita sea ");
-//                                children.addString(childName);
-//                            }
+                            children.addString(childName);
+
+                            String normalizedChildrenName = normalizeName(childName);
+                            String fatherNormalizedName = normalizeName(name);
+
+                            // Create a new Person object for the child with minimal details
+                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName, null, null, null, null);
+                            // Set the parent as the father of the child
+                            child.setFather(name);
+//                                 Add the child to the tree
+                            tree.addPerson(child);
                         }
                     }
                     break;
@@ -145,4 +152,21 @@ public class LoadJson {
         }
         return name + ", " + ofHisName + " of his name";
     }
+
+    /**
+     * Checks if a child is already present in the given parent.
+     *
+     * @param parent The parent Person object to check.
+     * @param childName The name of the child to check for duplicates.
+     * @return True if the child is already present, false otherwise.
+     */
+    
+//    private boolean isChildPresent(Person parent, String childName) {
+//        if (parent == null || childName == null || childName.trim().isEmpty()) {
+//            return false; // Invalid input
+//        }
+//
+//        // Use the parent's checkDuplicateChild method to verify if the child is already present
+////        return parent.checkDuplicateChild(parent, childName,);
+//    }
 }

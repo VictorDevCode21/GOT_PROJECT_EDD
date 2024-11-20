@@ -1,5 +1,7 @@
 package edu.unimet.edd.utils;
 
+import edu.unimet.edd.hash.HashTable;
+
 /**
  * Represents a person in the genealogy tree.
  */
@@ -231,48 +233,50 @@ public class Person {
     }
 
     /**
-     * Checks if a child is already present in the parent's list of children.
+     * Checks if a child is already present in the parent's list of children. If
+     * a duplicate is found, it removes the existing child from both the
+     * parent's children list and the HashTable.
      *
      * @param parent The parent Person object.
      * @param childName The name of the child to check.
-     * @return True if the child is a duplicate, false otherwise.
+     * @param hashTable The HashTable containing all the persons (for removal).
+     * @return True if the child was a duplicate (and removed from both the list
+     * and HashTable), false otherwise.
      */
-    public boolean checkDuplicateChild(Person parent, String childName) {
+    public String checkDuplicateChild(Person parent, String childName, HashTable hashTable) {
         if (parent == null) {
-//            System.out.println("Parent is null. Cannot check for duplicate children.");
-            return false; // No parent means no duplicates
+            return null; // No parent means no duplicates
         }
 
         LinkedList currentChildren = parent.getChildren();
         if (currentChildren == null) {
-//            System.out.println("Parent " + parent.getName() + " has no children list. Cannot check for duplicates.");
-            return false; // No children list means no duplicates
+            return null; // No children list means no duplicates
         }
 
         String newChildFirstName = getFirstName(childName);
 
-//        System.out.println("Checking for duplicate child...");
-//        System.out.println("Parent: " + parent.getName());
-//        System.out.println("Attempting to add child: " + childName + " (" + newChildFirstName + ")");
-//        System.out.println("Current children of " + parent.getName() + ":");
-
-        // Print the current list of children
-        for (int i = 0; i < currentChildren.size(); i++) {
-//            System.out.println("- " + currentChildren.get(i));
-        }
-
         // Check for duplicates
         for (int i = 0; i < currentChildren.size(); i++) {
             String existingChildFirstName = getFirstName(currentChildren.get(i));
-//            System.out.println("Comparing with existing child: " + currentChildren.get(i) + " (" + existingChildFirstName + ")");
+            String currentChild = currentChildren.get(i);
+
+            // If duplicate is found, remove the existing child from both the list and HashTable
             if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
-//                System.out.println("Duplicate detected: " + newChildFirstName + " already exists as a child of " + parent.getName());
-                return true; // A duplicate is found
+                // Removing the existing child from the parent's children list
+//                System.out.println("Borrando a " + currentChild);
+//                currentChildren.remove(currentChild);
+//
+//                // Remove from HashTable
+//                if (hashTable.get(currentChild) != null) {
+//                    hashTable.remove(currentChild);
+//                    System.out.println("Removed duplicate: " + currentChild + " from HashTable.");
+//                }
+
+                return currentChild.toLowerCase(); // A duplicate was found and removed from both the list and HashTable
             }
         }
 
-//        System.out.println("No duplicate found: " + newChildFirstName + " can be added as a child of " + parent.getName());
-        return false; // No duplicates found
+        return null; // No duplicate found
     }
 
 }
