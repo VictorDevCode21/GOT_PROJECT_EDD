@@ -46,64 +46,151 @@ public class Tree {
         String fullNameKey = normalizeName(getFullName(person));
         String nicknameKey = person.getNickname() != null ? normalizeName(person.getNickname()) : null;
 
+        // Debugging output to check the keys
+        System.out.println("Adding person with full name key: " + fullNameKey + " and nickname key: " + nicknameKey);
+
         // Check if this person already exists using any key
         if ((fullNameKey != null && table.get(fullNameKey) != null)
                 || (nicknameKey != null && table.get(nicknameKey) != null)) {
             // If the person exists, do not add duplicates
+            System.out.println("Duplicate found, not adding: " + person.getName());
             return;
         }
 
         // Add the person using all possible keys
         addPersonToHashTable(person, fullNameKey, nicknameKey);
+        // Debugging output to show successful addition
+        System.out.println("Successfully added person: " + person.getName());
 
-        // Handle father-child relationships
-//        if (person.getFather() != null) {
-////            System.out.println("Nombre de la persona: " + person.getName());
-//            String fatherName = normalizeName(person.getFather());
-////            System.out.println("Nombre del padre normalizado: " + fatherName);
-//
-//        }
+        // Print a list of all people in the HashTable after the addition
+        System.out.println("Current list of people in the HashTable:");
+        for (Person storedPerson : table.getAllPeople()) {
+            System.out.println("- Name: " + storedPerson.getName());
+        }
+        System.out.println("====================================");
 
-        // Add placeholder children if they do not exist
-//        LinkedList children = person.getChildren();
-//        if (children != null) {
-//            for (int i = 0; i < children.size(); i++) {
-//                String childName = normalizeName(children.get(i));
-//
-//                // Check for duplicate children with the same first name and same parent
-//                if (!checkDuplicateChild(person, childName)) {
-//                    // If the child does not exist, create a placeholder node
-//                    if (table.get(childName) == null) {
-//                        Person childPlaceholder = new Person(children.get(i), null, null, null, null, null, null, null);
-//                        addPersonToHashTable(childPlaceholder, childName, null);
-////                        System.out.println("Added child: " + childName + " to father: " + person.getName());
-//                    }
-//                } else {
-////                    System.out.println("Duplicate child not added: " + childName);
-//                }
-//            }
-//        }
-        
-        
         //          Print all people in the HashTable
-        System.out.println("Current contents of the HashTable:");
-        System.out.println("Current contents of the HashTable:");
-        Person[] people = table.getAllPeople(); // Use getAllPeople to retrieve stored persons
-        for (Person p : people) {
-            String father = (p.getFather() != null) ? p.getFather() : "No father registered";
-            System.out.println("- Name: " + p.getName() + ", Father: " + father);
+//        System.out.println("Current contents of the HashTable:");
+//        System.out.println("Current contents of the HashTable:");
+//        Person[] people = table.getAllPeople(); // Use getAllPeople to retrieve stored persons
+//        for (Person p : people) {
+//            String father = (p.getFather() != null) ? p.getFather() : "No father registered";
+//            System.out.println("- Name: " + p.getName() + ", Father: " + father);
+//
+//            // Print the children of this person
+//            LinkedList children2 = p.getChildren();
+//            if (children2 != null && children2.size() > 0) {
+//                System.out.println("  Children:");
+//                for (int i = 0; i < children2.size(); i++) {
+//                    System.out.println("    - " + children2.get(i));
+//                }
+//            } else {
+//                System.out.println("  No children registered.");
+//            }
+//        }   
+    }
 
-            // Print the children of this person
-            LinkedList children2 = p.getChildren();
-            if (children2 != null && children2.size() > 0) {
-                System.out.println("  Children:");
-                for (int i = 0; i < children2.size(); i++) {
-                    System.out.println("    - " + children2.get(i));
-                }
-            } else {
-                System.out.println("  No children registered.");
+    /**
+     * Creates a graph representation of the genealogy tree using GraphStream.
+     *
+     * @return A Graph object representing the genealogy tree.
+     */
+    public Graph createGraph() {
+        Graph graph = new SingleGraph("GenealogyTree");
+
+        // Set graph attributes
+        graph.setAttribute("ui.quality", true);
+        graph.setAttribute("ui.antialias", true);
+
+        // Step 1: Add all people as nodes
+        for (Person person : table.getAllPeople()) {
+            String personName = normalizeName(person.getName());
+
+            // Add the node if it does not exist
+            if (graph.getNode(personName) == null) {
+                graph.addNode(personName).setAttribute("ui.label", person.getName());
+                System.out.println("Added person to graph: " + person.getName());
             }
-        }   
+        }
+
+        // Print the nicknames of all people in the HashTable (if not null)
+        System.out.println("Nicknames of people in the HashTable:");
+        for (Person person : table.getAllPeople()) {
+            if (person.getNickname() != null) {
+                System.out.println(" - " + person.getNickname());
+            }
+        }
+
+        // Step 2: Add edges to connect children with their parents
+        for (Person person : table.getAllPeople()) {
+            String childName = normalizeName(person.getName());
+
+            // Add father-child relationship
+            if (person.getFather() != null && !person.getFather().equalsIgnoreCase("[unknown]")) {
+                String fatherName = normalizeName(person.getFather());
+
+                // Check if father exists in the graph by name or nickname
+                Node fatherNode = graph.getNode(fatherName);
+                if (fatherNode == null && person.getFather() != null) {
+                    for (Person possibleFather : table.getAllPeople()) {
+                        if (possibleFather.getNickname() != null
+                                && normalizeName(possibleFather.getNickname()).equals(fatherName)) {
+                            fatherNode = graph.getNode(normalizeName(possibleFather.getName()));
+                            break;
+                        }
+                    }
+                }
+
+                // Print all nodes currently in the graph
+//                System.out.println("Current nodes in the graph:");
+                for (Node node : graph) {
+//                    System.out.println(" - " + node.getId());
+                }
+
+                // If still not found, try to match by first and last name
+                if (fatherNode == null) {
+                    for (Node node : graph) {
+                        if (getFirstAndLastName(node.getId()).equals(getFirstAndLastName(fatherName))) {
+                            fatherNode = node;
+                            break;
+                        }
+                    }
+                }
+
+                // Check if both nodes exist in the graph
+                if (fatherNode != null && graph.getNode(childName) != null) {
+                    String edgeId = fatherNode.getId() + "-" + childName;
+                    if (graph.getEdge(edgeId) == null) {
+                        graph.addEdge(edgeId, fatherNode.getId(), childName, true);
+//                        System.out.println("Added edge: " + person.getFather() + " -> " + person.getName());
+                    }
+                } else {
+                    System.out.println("Skipped adding edge for father: " + person.getFather()
+                            + " for person " + person.getName()
+                            + " (Father node: " + (fatherNode != null ? "Exists" : "Does not exist")
+                            + ", Child node: " + (graph.getNode(childName) != null ? "Exists" : "Does not exist") + ")");
+                }
+            }
+        }
+
+        return graph;
+    }
+
+    /**
+     * Extracts the first and last name from a full name.
+     *
+     * @param fullName The full name string.
+     * @return A string containing only the first and last name.
+     */
+    private String getFirstAndLastName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            return "";
+        }
+        String[] parts = fullName.split(" ");
+        if (parts.length < 2) {
+            return fullName; // Return as is if less than two words
+        }
+        return parts[0] + " " + parts[1]; // Return the first and second word
     }
 
     /**
@@ -164,75 +251,6 @@ public class Tree {
     }
 
     /**
-     * Creates a graph representation of the genealogy tree using GraphStream.
-     *
-     * @return A Graph object representing the genealogy tree.
-     */
-    public Graph createGraph() {
-        Graph graph = new SingleGraph("GenealogyTree");
-
-        // Set graph attributes
-        graph.setAttribute("ui.quality", true);
-        graph.setAttribute("ui.antialias", true);
-
-        // Iterate through all people in the hash table
-        for (Person person : table.getAllPeople()) {
-            // Use unique identifier for nodes (prefer nickname if available)
-            String uniqueIdentifier = person.getNickname() != null
-                    ? normalizeName(person.getNickname())
-                    : normalizeName(getFullName(person));
-
-            // Add the node for the person if not already added
-            if (graph.getNode(uniqueIdentifier) == null) {
-                graph.addNode(uniqueIdentifier).setAttribute("ui.label", person.getName());
-//                System.out.println("Added vertex: " + person.getName());
-            }
-
-            // Add the father-child relationship
-            if (person.getFather() != null) {
-                String fatherId = normalizeName(person.getFather());
-
-                // Add the father's node if not already added
-                if (graph.getNode(fatherId) == null) {
-                    graph.addNode(fatherId).setAttribute("ui.label", person.getFather());
-//                    System.out.println("Added vertex: " + person.getFather());
-                }
-
-                // Add a directed edge from father to child
-                String edgeId = fatherId + "-" + uniqueIdentifier;
-                if (graph.getEdge(edgeId) == null) {
-                    graph.addEdge(edgeId, fatherId, uniqueIdentifier, true);
-                }
-            }
-
-            // Add the child nodes and edges
-            LinkedList children = person.getChildren();
-            if (children != null) {
-                for (int i = 0; i < children.size(); i++) {
-                    String childName = (String) children.get(i); // Casting to String
-
-                    // Normalize child name
-                    String childId = normalizeName(childName);
-
-                    // Add the child's node if not already added
-                    if (graph.getNode(childId) == null) {
-                        graph.addNode(childId).setAttribute("ui.label", childName);
-//                        System.out.println("Added vertex: " + childName);
-                    }
-
-                    // Add a directed edge from person to child
-                    String edgeId = uniqueIdentifier + "-" + childId;
-                    if (graph.getEdge(edgeId) == null) {
-                        graph.addEdge(edgeId, uniqueIdentifier, childId, true);
-                    }
-                }
-            }
-        }
-
-        return graph;
-    }
-
-    /**
      * Adds a person to the hash table using multiple keys.
      *
      * @param person The Person object to add.
@@ -279,56 +297,20 @@ public class Tree {
     }
 
     /**
-     * Prints the family tree to the console, displaying all ancestors and
-     * descendants for a given person in the genealogy.
+     * Retrieves all persons stored in the genealogy tree.
      *
-     * @param person The person whose family tree should be printed.
+     * @return A LinkedList containing all Person objects in the tree.
      */
-    public void printFamilyLog(Person person) {
-        LinkedList family = new LinkedList();
-        collectFamilyTree(person, family);
+    public LinkedList getAllPersons() {
+        LinkedList personList = new LinkedList(); // Create a new LinkedList to store the persons.
+        Person[] peopleArray = table.getAllPeople(); // Get the array of Person objects from the HashTable.
 
-        // Print the collected family members to the console
-        StringBuilder familyLog = new StringBuilder();
-        for (int i = 0; i < family.size(); i++) {
-            familyLog.append(family.get(i));
-            if (i < family.size() - 1) {
-                familyLog.append(", ");
-            }
-        }
-        System.out.println("Family of " + person.getName() + ": [" + familyLog.toString() + "]");
-    }
-
-    /**
-     * Recursively collects the entire family tree (ancestors and descendants)
-     * into a linked list.
-     *
-     * @param person The person to collect the family tree for.
-     * @param family The list to store the family members.
-     */
-    private void collectFamilyTree(Person person, LinkedList family) {
-        if (person == null) {
-            return;
+        // Convert the array into a LinkedList
+        for (Person person : peopleArray) {
+            personList.addPerson(person); // Add each person to the LinkedList.
         }
 
-        // Add the current person to the family list
-        family.addString(person.getName());
-
-        // Collect ancestors (father)
-        if (person.getFather() != null) {
-            Person father = table.get(person.getFather());
-            collectFamilyTree(father, family);  // Collect the father's family tree
-        }
-
-        // Collect descendants (children)
-        LinkedList children = person.getChildren();
-        if (children != null && !children.isEmpty()) {
-            for (int i = 0; i < children.size(); i++) {
-                String childName = children.get(i);
-                Person child = table.get(childName);
-                collectFamilyTree(child, family);  // Collect the child's family tree
-            }
-        }
+        return personList; // Return the LinkedList containing all persons.
     }
     
 /**

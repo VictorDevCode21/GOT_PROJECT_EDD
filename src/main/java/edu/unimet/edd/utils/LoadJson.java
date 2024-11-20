@@ -28,58 +28,16 @@ public class LoadJson {
                 JSONObject personEntry = houseArray.getJSONObject(i);
 
                 String personName = personEntry.keys().next();
+
                 JSONArray personDetails = personEntry.getJSONArray(personName);
 
+//                // Normalize the name before passing it to parsePersonDetails
+//                personName = normalizeName(personName);  // Normalizing the person's name
                 // Parse and add the person to the tree
                 Person person = parsePersonDetails(personName, personDetails);
-                tree.addPerson(person); // Add person to the tree
-            }
-        }
-
-        // Establish parent-child relationships after all people are added
-        for (String houseName : jsonObject.keySet()) {
-            JSONArray houseArray = jsonObject.getJSONArray(houseName);
-
-            for (int i = 0; i < houseArray.length(); i++) {
-                JSONObject personEntry = houseArray.getJSONObject(i);
-
-                String personName = personEntry.keys().next();
-                JSONArray personDetails = personEntry.getJSONArray(personName);
-
-                // Link parents and children within the tree
-                linkRelationships(tree, personName, personDetails);
-            }
-        }
-    }
-
-    /**
-     * Links the relationships (parent-child) in the tree after all persons are
-     * loaded.
-     *
-     * @param tree The Tree object containing all persons.
-     * @param personName The name of the person.
-     * @param personDetails The JSON array containing the person's details.
-     */
-    private void linkRelationships(Tree tree, String personName, JSONArray personDetails) {
-        Person person = tree.getPerson(personName);
-        if (person == null) {
-            return;
-        }
-
-        for (int i = 0; i < personDetails.length(); i++) {
-            JSONObject detail = personDetails.getJSONObject(i);
-            String key = detail.keys().next();
-
-            if ("Father to".equals(key)) {
-                JSONArray childrenArray = detail.getJSONArray(key);
-                for (int j = 0; j < childrenArray.length(); j++) {
-                    String childName = childrenArray.getString(j);
-                    Person child = tree.getPerson(childName);
-                    if (child != null) {
-                        // Set father for each child
-                        child.setFather(personName);
-                    }
-                }
+//                System.out.println("Adding person: " + person.getName());
+//                System.out.println("Adding person: " + personName);
+                tree.addPerson(person);
             }
         }
     }
@@ -122,12 +80,15 @@ public class LoadJson {
                 case "Father to":
                     if (value instanceof JSONArray) {
                         JSONArray childrenArray = (JSONArray) value;
+                        Person tempParent = new Person(name, title, nickname, father, mother, fate, ofHisName, children);
+
                         for (int j = 0; j < childrenArray.length(); j++) {
                             String childName = childrenArray.getString(j);
-                            // Use iterator to check for duplicates in children
-                            if (!isChildPresent(children, childName)) {
-                                children.addString(childName);
-                            }
+                            // Check for duplicates using isChildPresent
+//                            if (!isChildPresent(tempParent, childName)) {
+//                                System.out.println("Hola maldita sea ");
+//                                children.addString(childName);
+//                            }
                         }
                     }
                     break;
@@ -142,23 +103,46 @@ public class LoadJson {
             }
         }
 
-        return new Person(name, title, nickname, father, mother, fate, ofHisName, children);
+        // Generate the full name using the new method and normalize it
+        String fullName = getFullName(name, ofHisName);
+        fullName = normalizeName(fullName); // Normalizing the full name
+
+        // Now we ensure the nickname is normalized as well if it exists
+        if (nickname != null) {
+            nickname = normalizeName(nickname);
+        };
+
+//        System.out.println("Person: " + fullName + " Father: " + father);
+        return new Person(fullName, title, nickname, father, mother, fate, ofHisName, children);
     }
 
     /**
-     * Checks if a child is present in the list of children.
+     * Normalizes a name by standardizing the format for comparison. This method
+     * handles names with commas and other special characters.
      *
-     * @param children The list of children.
-     * @param childName The name of the child to check.
-     * @return True if the child is present, false otherwise.
+     * @param name The name to normalize.
+     * @return The normalized name.
      */
-    private boolean isChildPresent(LinkedList children, String childName) {
-        LinkedList.LinkedListIterator iterator = children.iterator(); // Use the correct iterator type
-        while (iterator.hasNext()) {
-            if (iterator.next().equals(childName)) {
-                return true; // Child is already in the list
-            }
+    private String normalizeName(String name) {
+        if (name == null) {
+            return null;
         }
-        return false; // Child is not in the list
+        // Remove commas and extra spaces, then convert to lowercase for consistent comparison
+        return name.trim().replace(",", "").toLowerCase();
+    }
+
+    /**
+     * Constructs the full name of a person by combining their name and "Of his
+     * name" value.
+     *
+     * @param name The base name of the person.
+     * @param ofHisName The value of "Of his name" (e.g., "First").
+     * @return The full name in the format "name, [Of his name] of his name".
+     */
+    private String getFullName(String name, String ofHisName) {
+        if (ofHisName == null || ofHisName.isEmpty()) {
+            return name; // If "Of his name" is not provided, return the base name
+        }
+        return name + ", " + ofHisName + " of his name";
     }
 }
