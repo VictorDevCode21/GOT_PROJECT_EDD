@@ -1,7 +1,9 @@
 package edu.unimet.edd.hash;
 
+import edu.unimet.edd.listeners.HashTableListener;
 import edu.unimet.edd.utils.Person;
 import edu.unimet.edd.tree.Tree;
+import edu.unimet.edd.utils.LinkedListListeners;
 import edu.unimet.edd.utils.LoadJson;
 
 /**
@@ -15,7 +17,10 @@ public class HashTable {
     private LinkedList[] table; // Array of LinkedLists to store entries
     private int size; // Current size of the table
     private double loadFactor; // Load factor for resizing
-//    private ListenerLinkedList listeners;
+    private LinkedListListeners listeners;
+    private BucketLinkedList[] buckets;
+    private static HashTable instance;
+    private int capacity;
 
     /**
      * Constructor to initialize the hash table with default capacity.
@@ -31,6 +36,7 @@ public class HashTable {
      */
     public HashTable(int capacity) {
         this.table = new LinkedList[capacity];
+        this.buckets = new BucketLinkedList[capacity];
         this.size = 0;
         this.loadFactor = 0.75; // Default load factor
 //        this.listeners = new ListenerLinkedList(); // Initialize listeners list
@@ -38,9 +44,60 @@ public class HashTable {
             table[i] = new LinkedList(); // Initialize each bucket with an empty LinkedList
         }
 
+        // Initialize each bucket
+        for (int i = 0; i < capacity; i++) {
+            buckets[i] = new BucketLinkedList();
+        }
+
+        this.listeners = new LinkedListListeners();
+
     }
 
+    public static HashTable getInstance() {
+        if (instance == null) {
+            instance = new HashTable();
+        }
+        return instance;
+    }
 
+    /**
+     * Synchronizes the data from another HashTable into this one.
+     *
+     * @param source The source HashTable to copy data from.
+     */
+    public void syncData(HashTable source) {
+        if (source == null) {
+            return;
+        }
+
+        // Clear all buckets
+        for (int i = 0; i < capacity; i++) {
+            buckets[i].clear();
+        }
+
+        // Copy data from source buckets
+        for (int i = 0; i < source.capacity; i++) {
+            BucketLinkedList sourceBucket = source.buckets[i];
+            BucketLinkedList clonedBucket = sourceBucket.cloneBucket();
+            buckets[i] = clonedBucket;
+        }
+    }
+
+    /**
+     * Adds a listener to the HashTable.
+     *
+     * @param listener The listener to add.
+     */
+    public void addListener(HashTableListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Notifies all registered listeners of a HashTable update.
+     */
+    private void notifyListeners() {
+        listeners.notifyListeners();
+    }
 
     /**
      * Method to insert a key-value pair into the hash table. If the key already
@@ -61,6 +118,7 @@ public class HashTable {
         if (!bucket.containsKey(key)) {
             bucket.add(key, value);  // Only add if key does not already exist
             size++;
+            notifyListeners(); // Notify listeners after the update
         }
     }
 

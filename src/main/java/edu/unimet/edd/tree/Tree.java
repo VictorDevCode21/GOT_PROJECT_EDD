@@ -1,10 +1,11 @@
 package edu.unimet.edd.tree;
 
-import edu.unimet.edd.utils.LinkedList;
+import edu.unimet.edd.utils.PersonLinkedList;
 import edu.unimet.edd.utils.Person;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import edu.unimet.edd.hash.HashTable;
+import edu.unimet.edd.listeners.HashTableListener;
 import org.graphstream.graph.Node;
 
 /**
@@ -12,7 +13,7 @@ import org.graphstream.graph.Node;
  * relationships. It also provides methods to load the genealogy data from JSON
  * and generate a visual graph.
  */
-public class Tree {
+public class Tree implements HashTableListener {
 
     private HashTable table; // A hash table to store the people and their information
 
@@ -20,7 +21,14 @@ public class Tree {
      * Constructs a Tree object.
      */
     public Tree() {
-        table = new HashTable();
+        table = HashTable.getInstance();
+        table.addListener(this);
+    }
+
+    @Override
+    public void onHashTableUpdated() {
+        // Synchronize the local HashTable instance with the singleton instance
+        this.table.syncData(HashTable.getInstance());
     }
 
     /**
@@ -96,7 +104,7 @@ public class Tree {
 //                        System.out.println("No coincidences for the child");
                     Boolean deleted = table.remove(duplicatedChildName);
                     if (deleted == true) {
-                        System.out.println("Child eliminated: " + duplicatedChildName + " father: " + father.getName());
+//                        System.out.println("Child eliminated: " + duplicatedChildName + " father: " + father.getName());
                     }
 
                     // Check if the duplicate child was removed
@@ -137,9 +145,8 @@ public class Tree {
 //            }
 //        }
 //        System.out.println("]");
-
 //        Debugging output: print all people in the table along with their children
-//        System.out.println("Current people in the HashTable with their children:");
+//        System.out.println("\nCurrent people in the HashTable with their children:\n");
 //        Person[] allPeople = table.getAllPeople();
 //        for (Person person2 : allPeople) {
 //            if (person2 != null) {
@@ -162,7 +169,6 @@ public class Tree {
 //                }
 //            }
 //        }
-
     }
 
     /**
@@ -302,17 +308,17 @@ public class Tree {
     /**
      * Retrieves all persons stored in the genealogy tree.
      *
-     * @return A LinkedList containing all Person objects in the tree.
+     * @return A PersonLinkedList containing all Person objects in the tree.
      */
-    public LinkedList getAllPersons() {
-        LinkedList personList = new LinkedList(); // Create a new LinkedList to store the persons.
+    public PersonLinkedList getAllPersons() {
+        PersonLinkedList personList = new PersonLinkedList(); // Create a new PersonLinkedList to store the persons.
         Person[] peopleArray = table.getAllPeople(); // Get the array of Person objects from the HashTable.
 
-        // Convert the array into a LinkedList
+        // Convert the array into a PersonLinkedList
         for (Person person : peopleArray) {
-            personList.addPerson(person); // Add each person to the LinkedList.
+            personList.addPerson(person); // Add each person to the PersonLinkedList.
         }
 
-        return personList; // Return the LinkedList containing all persons.
+        return personList; // Return the PersonLinkedList containing all persons.
     }
 }

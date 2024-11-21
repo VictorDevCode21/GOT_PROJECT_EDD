@@ -4,12 +4,12 @@ package edu.unimet.edd.utils;
  * A simple implementation of a LinkedList. This class stores elements and
  * allows access to them by index.
  */
-public class LinkedList {
+public class PersonLinkedList {
 
     private Node head;  // Head node of the list
     private int size;   // Size of the list
 
-    public LinkedList() {
+    public PersonLinkedList() {
         this.head = null;
         this.size = 0;
     }
@@ -103,7 +103,8 @@ public class LinkedList {
     }
 
     /**
-     * Removes the first occurrence of a specified value from the LinkedList.
+     * Removes the first occurrence of a specified value from the
+     * PersonLinkedList.
      *
      * @param value The value to remove from the list.
      * @return true if the value was found and removed, false otherwise.
@@ -137,7 +138,7 @@ public class LinkedList {
     }
 
     /**
-     * Returns an iterator for this LinkedList.
+     * Returns an iterator for this PersonLinkedList.
      *
      * @return A new iterator for the list.
      */
@@ -146,7 +147,7 @@ public class LinkedList {
     }
 
     /**
-     * Iterator class for LinkedList.
+     * Iterator class for PersonLinkedList.
      */
     public class LinkedListIterator implements Iterator<String> {
 
@@ -183,7 +184,23 @@ public class LinkedList {
     }
 
     /**
-     * A Node class to represent each element in the LinkedList.
+     * Converts the linked list to an array of strings.
+     *
+     * @return An array of strings representing the values in the list.
+     */
+    public String[] toArray() {
+        String[] array = new String[size];
+        Node current = head;
+        int index = 0;
+        while (current != null) {
+            array[index++] = current.getValue();
+            current = current.getNext();
+        }
+        return array;
+    }
+
+    /**
+     * A Node class to represent each element in the PersonLinkedList.
      */
     private class Node {
 

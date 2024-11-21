@@ -56,7 +56,7 @@ public class LoadJson {
         String mother = null;
         String fate = null;
         String ofHisName = null;
-        LinkedList children = new LinkedList();
+        PersonLinkedList children = new PersonLinkedList();
 
         for (int i = 0; i < personDetails.length(); i++) {
             JSONObject detail = personDetails.getJSONObject(i);

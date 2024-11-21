@@ -13,7 +13,7 @@ public class Person {
     private String father;
     private String mother;
     private String fate;
-    private LinkedList children;
+    private PersonLinkedList children;
     private String ofHisName;
 
     /**
@@ -28,7 +28,7 @@ public class Person {
      * @param ofHisName The "Of his name" value for the person.
      * @param children A list of the person's children.
      */
-    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, LinkedList children) {
+    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, PersonLinkedList children) {
         this.name = name;
         this.title = title;
         this.nickname = nickname;
@@ -158,14 +158,14 @@ public class Person {
     /**
      * @return the children
      */
-    public LinkedList getChildren() {
+    public PersonLinkedList getChildren() {
         return children;
     }
 
     /**
      * @param children the children to set
      */
-    public void setChildren(LinkedList children) {
+    public void setChildren(PersonLinkedList children) {
         this.children = children;
     }
 
@@ -181,6 +181,42 @@ public class Person {
      */
     public void setOfHisName(String ofHisName) {
         this.ofHisName = ofHisName;
+    }
+
+    /**
+     * Retrieves the details of this person in a formatted string if the given
+     * name matches this person's name.
+     *
+     * @param name The name of the person to retrieve details for.
+     * @return A formatted string containing the person's details, or null if
+     * the name does not match.
+     */
+    public String getDetailsByName(String name) {
+        if (this.name.equalsIgnoreCase(name)) {
+            StringBuilder details = new StringBuilder();
+            details.append("Name: ").append(this.name).append("\n");
+            details.append("Title: ").append(this.title != null ? this.title : "None").append("\n");
+            details.append("Nickname: ").append(this.nickname != null ? this.nickname : "None").append("\n");
+            details.append("Father: ").append(this.father != null ? this.father : "Unknown").append("\n");
+            details.append("Mother: ").append(this.mother != null ? this.mother : "Unknown").append("\n");
+            details.append("Fate: ").append(this.fate != null ? this.fate : "Unknown").append("\n");
+            details.append("Of His Name: ").append(this.ofHisName != null ? this.ofHisName : "Unknown").append("\n");
+
+            details.append("Children: ");
+            if (this.children != null && this.children.size() > 0) {
+                for (int i = 0; i < this.children.size(); i++) {
+                    details.append(this.children.get(i));
+                    if (i < this.children.size() - 1) {
+                        details.append(", ");
+                    }
+                }
+            } else {
+                details.append("None");
+            }
+
+            return details.toString();
+        }
+        return null; // Name does not match
     }
 
     /**
@@ -251,7 +287,7 @@ public class Person {
         String newChildFirstName = getFirstName(childName);
 //        System.out.println("Trying to add: " + childName);
 
-        LinkedList currentChildren = parent.getChildren();
+        PersonLinkedList currentChildren = parent.getChildren();
 //        System.out.println("Showing father: " + parent.getName());
         if (currentChildren == null) {
             return null; // No children list means no duplicates
@@ -266,7 +302,6 @@ public class Person {
         for (int i = 0; i < currentChildren.size(); i++) {
             String existingChildFirstName = getFirstName(currentChildren.get(i));
             String currentChild = currentChildren.get(i);
-            
 
             // If duplicate is found, remove the existing child from both the list and HashTable
             if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
