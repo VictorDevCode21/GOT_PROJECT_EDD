@@ -248,30 +248,29 @@ public class Person {
             return null; // No parent means no duplicates
         }
 
+        String newChildFirstName = getFirstName(childName);
+//        System.out.println("Trying to add: " + childName);
+
         LinkedList currentChildren = parent.getChildren();
+//        System.out.println("Showing father: " + parent.getName());
         if (currentChildren == null) {
             return null; // No children list means no duplicates
         }
 
-        String newChildFirstName = getFirstName(childName);
+//        System.out.println("Showing children: ");
+        for (int i = 0; i < currentChildren.size(); i++) {
+//            System.out.println("lista de hijos: " + currentChildren.get(i));
+        }
 
         // Check for duplicates
         for (int i = 0; i < currentChildren.size(); i++) {
             String existingChildFirstName = getFirstName(currentChildren.get(i));
             String currentChild = currentChildren.get(i);
+            
 
             // If duplicate is found, remove the existing child from both the list and HashTable
             if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
-                // Removing the existing child from the parent's children list
-//                System.out.println("Borrando a " + currentChild);
-//                currentChildren.remove(currentChild);
-//
-//                // Remove from HashTable
-//                if (hashTable.get(currentChild) != null) {
-//                    hashTable.remove(currentChild);
-//                    System.out.println("Removed duplicate: " + currentChild + " from HashTable.");
-//                }
-
+//                System.out.println("Removed duplicate: " + currentChild.toLowerCase() + " his father is: " +  parent.getName());
                 return currentChild.toLowerCase(); // A duplicate was found and removed from both the list and HashTable
             }
         }

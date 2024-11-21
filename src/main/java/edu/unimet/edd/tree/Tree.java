@@ -63,6 +63,29 @@ public class Tree {
             // Try to find the father in the HashTable
             Person father = table.get(fatherName);
 
+            if (father == null) {
+                Person[] all = table.getAllPeople();
+                for (int i = 0; i < table.getAllPeople().length; i++) {
+                    String temp = all[i].getName();
+
+                    if (temp == null) {
+                        continue;
+                    }
+
+                    String current = getFirstAndLastName(temp);
+
+//                    System.out.println("Temp: " + temp);
+//                    System.out.println("El current es: " + current + " es igual a :" + fatherName);
+                    if (current.equalsIgnoreCase(fatherName)) {
+//                        System.out.println("Founded: " + temp + " father " + fatherName);
+//                        System.out.println("Temp: " + temp);
+//                        System.out.println("Father: " + fatherName);
+                        father = table.get(temp);
+                    }
+                }
+
+            }
+
             // If the father exists, check for duplicate children
             if (father != null) {
                 // Remove duplicates and then add the child
@@ -72,10 +95,9 @@ public class Tree {
 //                    if (table.get(duplicatedChildName) == null)
 //                        System.out.println("No coincidences for the child");
                     Boolean deleted = table.remove(duplicatedChildName);
-//                    if (deleted == true)
-//                        System.out.println("Child eliminated: " + duplicatedChildName);
-                    
-                    
+                    if (deleted == true) {
+                        System.out.println("Child eliminated: " + duplicatedChildName + " father: " + father.getName());
+                    }
 
                     // Check if the duplicate child was removed
 //                    if (table.get(duplicatedChildName) == null) {
@@ -83,20 +105,18 @@ public class Tree {
 //                    } else {
 //                        System.out.println("Failed to remove duplicated child: " + duplicatedChildName);
 //                    }
-
                     // Ensure the father does not reference the removed child
-                    father.getChildren().remove(duplicatedChildName);
+//                    father.getChildren().remove(duplicatedChildName);
 //                    if (father.getChildren().get(duplicatedChildName) != null)
 //                        System.out.println("Child's not in the list" + duplicatedChildName);
                 }
 
                 // Now add the current person as a child of the father
-                if (table.get(duplicatedChildName) == null || !duplicatedChildName.equalsIgnoreCase(person.getName())) {
-//                    System.out.println("added: " + person.getName());
-                    father.getChildren().addString(person.getName());
-                    
-                }
-
+//                if (table.get(duplicatedChildName) == null || !duplicatedChildName.equalsIgnoreCase(person.getName())) {
+////                    System.out.println("added: " + person.getName());
+//                    father.getChildren().addString(person.getName());
+//
+//                }
             } else {
 //                System.out.println("Father " + fatherName + " not found in the HashTable.");
             }
@@ -104,7 +124,9 @@ public class Tree {
 
         // Add the person using all possible keys
         addPersonToHashTable(person, fullNameKey, nicknameKey);
+//        System.out.println("Person: " + person.getName() + " Father: " + person.getFather());
 
+//        System.out.println("Person added: " + person.getName());
         // Debugging output: print the list of people in the HashTable
 //        System.out.print("Lista de personas despues del metodo: [");
 //        Person[] allPeople = table.getAllPeople();
@@ -115,6 +137,32 @@ public class Tree {
 //            }
 //        }
 //        System.out.println("]");
+
+//        Debugging output: print all people in the table along with their children
+//        System.out.println("Current people in the HashTable with their children:");
+//        Person[] allPeople = table.getAllPeople();
+//        for (Person person2 : allPeople) {
+//            if (person2 != null) {
+//                // Print the person's name
+//                System.out.print("Person name: " + person2.getName() + " | Children: ");
+//
+//                // Print the list of children
+//                if (person2.getChildren() != null && person2.getChildren().size() > 0) {
+//                    System.out.print("[");
+//                    for (int i = 0; i < person2.getChildren().size(); i++) {
+//                        System.out.print(person2.getChildren().get(i));
+//                        if (i < person2.getChildren().size() - 1) {
+//                            System.out.print(", ");
+//                        }
+//                    }
+//                    System.out.println("]");
+//                } else {
+//                    // No children
+//                    System.out.println("No children.");
+//                }
+//            }
+//        }
+
     }
 
     /**
@@ -219,7 +267,6 @@ public class Tree {
         }
         return parts[0] + " " + parts[1]; // Return the first and second word
     }
-
 
     /**
      * Adds a person to the hash table using multiple keys.
