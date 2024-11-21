@@ -12,6 +12,7 @@ import org.graphstream.algorithm.Toolkit;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -121,30 +122,14 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
 
         // Create a ProxyPipe to retrieve updates from the viewer
         ProxyPipe pipe = viewer.newViewerPipe();
-        // Add the graph as an attribute sink to the pipe
         pipe.addAttributeSink(graph);
 
-        // Iterate over the nodes and retrieve their updated positions
-        for (Node node : graph) {
-            // Use Toolkit.nodePosition to get the updated position of each node
-            double[] pos = Toolkit.nodePosition(graph, node.getId());
-            System.out.println("Node " + node.getId() + " Position: x=" + pos[0] + ", y=" + pos[1]);
-        }
-
-        // Start consuming the events from the pipe and update the graph
+        // Start consuming events from the pipe and updating the graph
         new Thread(() -> {
             try {
                 while (true) {
-                    // A small delay to avoid full CPU load
-                    Thread.sleep(100);
-                    // Consume the events stored in the buffer, if any
+                    Thread.sleep(100); // Avoid full CPU usage
                     pipe.pump();
-
-                    // Now the "xyz" attributes of the nodes are updated, and we can use them
-                    for (Node node : graph) {
-                        double[] pos = Toolkit.nodePosition(graph, node.getId());
-                        System.out.println("Updated Position of Node " + node.getId() + ": x=" + pos[0] + ", y=" + pos[1]);
-                    }
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -158,6 +143,48 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     System.out.println("\nMouse clicked at: x=" + e.getX() + ", y=" + e.getY());
+
+                    double threshold = 10.0; // Define the threshold distance for node selection
+                    boolean nodeFound = false;
+
+                    // Iterate over all nodes in the graph
+                    for (Node node : graph) {
+                        // Retrieve node coordinates in graph units (GU)
+                        // Retrieve node coordinates in graph units (GU)
+                        Object xyzObject = node.getAttribute("xyz");
+                        if (xyzObject == null) {
+                            System.out.println("Node " + node.getId() + " position is null. Skipping.");
+                            continue;
+                        }
+
+                        Object[] xyz = (Object[]) xyzObject; // Cast explicitly to Object[]
+                        double nodeX = (double) xyz[0];
+                        double nodeY = (double) xyz[1];
+
+                        // Convert graph units (GU) to pixels
+                        Point3 pixels = viewer.getDefaultView().getCamera().transformGuToPx(nodeX, nodeY, 0);
+                        double pixelX = pixels.x;
+                        double pixelY = pixels.y;
+
+                        System.out.printf("Node %s: Graph position (%.3f, %.3f) --> Pixel position (%.0f, %.0f)%n",
+                                node.getId(), nodeX, nodeY, pixelX, pixelY);
+
+                        // Calculate the distance between the click and the node in pixel space
+                        double distance = Math.sqrt(Math.pow(e.getX() - pixelX, 2) + Math.pow(e.getY() - pixelY, 2));
+                        System.out.println("Distance from click to node " + node.getId() + ": " + distance);
+
+                        // If the distance is within the threshold, change the node's color
+                        if (distance < threshold) {
+                            System.out.println("Node " + node.getId() + " clicked. Changing color to green.");
+                            node.setAttribute("ui.style", "fill-color: green;");
+                            nodeFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!nodeFound) {
+                        System.out.println("No node found close to the click position.");
+                    }
                 }
             });
         } else {
@@ -170,10 +197,6 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         graphPanel.revalidate();
         graphPanel.repaint();
     }
-    
-    
-    
-    
 
     public static void main(String[] args) {
         // Run the GUI application
