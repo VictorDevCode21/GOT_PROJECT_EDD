@@ -16,6 +16,7 @@ import org.graphstream.graph.Node;
 public class Tree implements HashTableListener {
 
     private HashTable table; // A hash table to store the people and their information
+    private boolean foreFathersNeeded;
 
     /**
      * Constructs a Tree object.
@@ -174,23 +175,115 @@ public class Tree implements HashTableListener {
     /**
      * Creates a graph representation of the genealogy tree using GraphStream.
      *
-     * @return A Graph object representing the genealogy tree.
+     * @param personToLookFor The name of the person to search for.
+     * @param foreFathersNeeded If true, loads only the forefathers of the given
+     * person.
+     * @return A Graph object representing the genealogy tree or forefathers.
      */
-    public Graph createGraph() {
+    public Graph createGraph(String personToLookfor, boolean foreFathersNeeded) {
         Graph graph = new SingleGraph("GenealogyTree");
 
         // Set graph attributes
         graph.setAttribute("ui.quality", true);
         graph.setAttribute("ui.antialias", true);
 
-        // Step 1: Add all people as nodes
-        for (Person person : table.getAllPeople()) {
-            String personName = normalizeName(person.getName());
+        // If no foreFathers needes, we load all the lineage        
+        if (foreFathersNeeded) {
+            loadForeFathersGraph(personToLookfor, graph);
+        } else {
+            loadAllLineageGraph(graph);
+        }
+        return graph;
+    }
 
-            // Add the node if it does not exist
-            if (graph.getNode(personName) == null) {
-                graph.addNode(personName).setAttribute("ui.label", person.getName());
+    /**
+     * Loads the forefathers of a specific person into the graph.
+     *
+     * @param personName The name of the person whose forefathers will be
+     * loaded.
+     * @param graph The Graph object where nodes and edges will be added.
+     */
+    private void loadForeFathersGraph(String personName, Graph graph) {
+        // Step 1: Find the person in the HashTable
+        Person currentPerson = table.get(personName);
+
+        if (currentPerson == null) {
+            System.out.println("Person not found in the HashTable: " + personName);
+            return;
+        }
+
+        // Step 2: Traverse the forefathers chain
+        while (currentPerson != null) {
+            String currentName = normalizeName(currentPerson.getName());
+
+            // Add the current person as a node if it doesn't already exist
+            if (graph.getNode(currentName) == null) {
+                graph.addNode(currentName).setAttribute("ui.label", currentPerson.getName());
+            }
+
+            // Get the father's name and search for their record
+            String fatherName = currentPerson.getFather();
+            if (fatherName != null && !fatherName.equalsIgnoreCase("[unknown]")) {
+                String normalizedFatherName = normalizeName(fatherName);
+
+                // Attempt to get the father from the HashTable
+                Person fatherPerson = table.get(normalizedFatherName);
+
+                // If not found, search using getFirstAndLastName and nickname
+                if (fatherPerson == null) {
+                    for (Person person : table.getAllPeople()) {
+                        // Compare by first and last name
+                        if (getFirstAndLastName(normalizeName(person.getName()))
+                                .equals(getFirstAndLastName(normalizedFatherName))) {
+                            fatherPerson = person;
+                            break;
+                        }
+                        // Compare by nickname
+                        if (person.getNickname() != null
+                                && normalizeName(person.getNickname()).equals(normalizedFatherName)) {
+                            fatherPerson = person;
+                            break;
+                        }
+                    }
+                }
+
+                // If a father is found, add them to the graph
+                if (fatherPerson != null) {
+                    String fatherNodeName = normalizeName(fatherPerson.getName());
+                    if (graph.getNode(fatherNodeName) == null) {
+                        graph.addNode(fatherNodeName).setAttribute("ui.label", fatherPerson.getName());
+                    }
+
+                    // Add an edge between the current person and their father
+                    String edgeId = fatherNodeName + "-" + currentName;
+                    if (graph.getEdge(edgeId) == null) {
+                        graph.addEdge(edgeId, fatherNodeName, currentName, true);
+                    }
+
+                    // Move to the father for the next iteration
+                    currentPerson = fatherPerson;
+                } else {
+                    // If no father record is found, terminate the loop
+                    currentPerson = null;
+                }
+            } else {
+                // If father name is unknown, terminate the loop
+                currentPerson = null;
+            }
+        }
+    }
+
+    private void loadAllLineageGraph(Graph graph) {
+        // Step 1: Add all people as nodes
+        {
+            for (Person person : table.getAllPeople()) {
+                String personName = normalizeName(person.getName());
+
+                // Add the node if it does not exist
+                if (graph.getNode(personName) == null) {
+                    graph.addNode(personName).setAttribute("ui.label", person.getName());
 //                System.out.println("Added person to graph: " + person.getName());
+                }
             }
         }
 
@@ -253,8 +346,6 @@ public class Tree implements HashTableListener {
                 }
             }
         }
-
-        return graph;
     }
 
     /**

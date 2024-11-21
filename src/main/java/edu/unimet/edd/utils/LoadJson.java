@@ -56,6 +56,10 @@ public class LoadJson {
         String mother = null;
         String fate = null;
         String ofHisName = null;
+        String eyesColor = null;
+        String hairColor = null;
+        String notes = null;
+        String wedTo = null;
         PersonLinkedList children = new PersonLinkedList();
 
         for (int i = 0; i < personDetails.length(); i++) {
@@ -80,7 +84,6 @@ public class LoadJson {
                 case "Father to":
                     if (value instanceof JSONArray) {
                         JSONArray childrenArray = (JSONArray) value;
-                        Person tempParent = new Person(name, title, nickname, father, mother, fate, ofHisName, children);
 
                         for (int j = 0; j < childrenArray.length(); j++) {
                             String childName = childrenArray.getString(j);
@@ -91,9 +94,10 @@ public class LoadJson {
                             String fatherNormalizedName = normalizeName(name);
 
                             // Create a new Person object for the child with minimal details
-                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName, null, null, null, null);
+                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName,null, null, null, null, null, null, null, null);
                             // Set the parent as the father of the child
-                            child.setFather(name);
+                            child.setFather(name.toLowerCase());
+//                            System.out.println("En LoadJson se guarda asi: " + name.toLowerCase());
 //                                 Add the child to the tree
                             tree.addPerson(child);
                         }
@@ -104,6 +108,18 @@ public class LoadJson {
                     break;
                 case "Of his name":
                     ofHisName = (String) value;
+                    break;
+                case "Of eyes":
+                    eyesColor = (String) value;
+                    break;
+                case "Of hair":
+                    hairColor = (String) value;
+                    break;
+                case "Notes":
+                    notes = (String) value;
+                    break;
+                case "Wed to":
+                    wedTo = (String) value;
                     break;
                 default:
                     break;
@@ -120,7 +136,7 @@ public class LoadJson {
         };
 
 //        System.out.println("Person: " + fullName + " Father: " + father);
-        return new Person(fullName, title, nickname, father, mother, fate, ofHisName, children);
+        return new Person(fullName, title, nickname, father, mother, fate, ofHisName, eyesColor, hairColor, notes, wedTo, children);
     }
 
     /**

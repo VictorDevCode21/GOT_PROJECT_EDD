@@ -28,6 +28,9 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
     private JPanel graphPanel;
     private Viewer viewer;
     private HashTable table;
+    private boolean jsonLoaded = false;
+    private Graph graph;
+    private boolean foreFathersNeeded = false;
 
     public GenealogyGUI() {
         // Initialize the tree and other components
@@ -57,11 +60,29 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         // Add a "See Register" button
         JButton seeRegisterButton = new JButton("See Register");
         seeRegisterButton.addActionListener(e -> {
+            if (jsonLoaded) {
+                updateGraphDisplay(null, false);
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+                return;
+            }
+
             JOptionPane.showMessageDialog(this,
                     "Click a node in the graph to view its details.",
                     "Info", JOptionPane.INFORMATION_MESSAGE);
         });
         controlsPanel.add(seeRegisterButton);
+
+        JButton showForefathersButton = new JButton("Show Forefathers");
+        showForefathersButton.addActionListener(e -> {
+            if (jsonLoaded) {
+                showForefathers();
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+            }
+        });
+        controlsPanel.add(showForefathersButton);
+
     }
 
     @Override
@@ -90,7 +111,9 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 // Load the genealogy data into the tree
                 LoadJson loadJson = new LoadJson();
                 loadJson.loadGenealogy(jsonContent, tree);
-                updateGraphDisplay();
+                jsonLoaded = true;
+                JOptionPane.showMessageDialog(rootPane, "JSON file correctly loaded");
+
             } catch (IOException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Failed to load tree file", "Error", JOptionPane.ERROR_MESSAGE);
@@ -101,18 +124,17 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
     /**
      * Updates the graph display with the current genealogy tree.
      */
-    private void updateGraphDisplay() {
+    private void updateGraphDisplay(String personToLookFor, boolean foreFathersNeeded) {
         // Create the graph based on the current tree data
-        Graph graph = tree.createGraph();
+        Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded);
 
-        System.out.println("Table size in GenealogyGUI: " + table.size());
-
+//        System.out.println("Table size in GenealogyGUI: " + table.size());
         // If a viewer already exists, close its previous view to avoid conflicts
         if (viewer != null) {
             try {
                 viewer.close();  // Ensure previous viewer is closed properly
             } catch (Exception e) {
-                System.out.println("Error closing the viewer: " + e.getMessage());
+//                System.out.println("Error closing the viewer: " + e.getMessage());
             }
         }
 
@@ -142,49 +164,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             view.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
-                    System.out.println("\nMouse clicked at: x=" + e.getX() + ", y=" + e.getY());
-
-                    double threshold = 10.0; // Define the threshold distance for node selection
-                    boolean nodeFound = false;
-
-                    // Iterate over all nodes in the graph
-                    for (Node node : graph) {
-                        // Retrieve node coordinates in graph units (GU)
-                        // Retrieve node coordinates in graph units (GU)
-                        Object xyzObject = node.getAttribute("xyz");
-                        if (xyzObject == null) {
-                            System.out.println("Node " + node.getId() + " position is null. Skipping.");
-                            continue;
-                        }
-
-                        Object[] xyz = (Object[]) xyzObject; // Cast explicitly to Object[]
-                        double nodeX = (double) xyz[0];
-                        double nodeY = (double) xyz[1];
-
-                        // Convert graph units (GU) to pixels
-                        Point3 pixels = viewer.getDefaultView().getCamera().transformGuToPx(nodeX, nodeY, 0);
-                        double pixelX = pixels.x;
-                        double pixelY = pixels.y;
-
-                        System.out.printf("Node %s: Graph position (%.3f, %.3f) --> Pixel position (%.0f, %.0f)%n",
-                                node.getId(), nodeX, nodeY, pixelX, pixelY);
-
-                        // Calculate the distance between the click and the node in pixel space
-                        double distance = Math.sqrt(Math.pow(e.getX() - pixelX, 2) + Math.pow(e.getY() - pixelY, 2));
-                        System.out.println("Distance from click to node " + node.getId() + ": " + distance);
-
-                        // If the distance is within the threshold, change the node's color
-                        if (distance < threshold) {
-                            System.out.println("Node " + node.getId() + " clicked. Changing color to green.");
-                            node.setAttribute("ui.style", "fill-color: green;");
-                            nodeFound = true;
-                            break;
-                        }
-                    }
-
-                    if (!nodeFound) {
-                        System.out.println("No node found close to the click position.");
-                    }
+                    handleNodeClick(graph, e);
                 }
             });
         } else {
@@ -196,6 +176,101 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         graphPanel.add(view, BorderLayout.CENTER);
         graphPanel.revalidate();
         graphPanel.repaint();
+    }
+
+    /**
+     * Displays the forefathers of a person as a graph.
+     */
+    private void showForefathers() {
+        // Prompt the user for a name
+        String personName = JOptionPane.showInputDialog(
+                this,
+                "Enter the name of the person followed by the number "
+                        + "of that\n person in your lineage, "
+                        + "example: robert baratheon first of his name:",
+                "Show Forefathers",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        
+
+        if (personName == null || personName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Name cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Search for the person in the HashTable
+        Person person = table.get(personName);
+        if (person == null) {
+            JOptionPane.showMessageDialog(this, "Person not found in the genealogy tree.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+//        if (graph == null) {
+//            JOptionPane.showMessageDialog(this, "No graph charged.", "Info", JOptionPane.INFORMATION_MESSAGE);
+//            return;
+//        }
+        
+        foreFathersNeeded = true;
+
+        // Display the graph using the existing method
+        updateGraphDisplay(personName,foreFathersNeeded);
+
+        JOptionPane.showMessageDialog(this,
+                "Click a node in the graph to view its details.",
+                "Info", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Handles the logic when a node in the graph is clicked.
+     *
+     * @param graph The graph containing the node.
+     * @param e The mouse event.
+     */
+    private void handleNodeClick(Graph graph, java.awt.event.MouseEvent e) {
+        double threshold = 10.0; // Define the threshold distance for node selection
+        boolean nodeFound = false;
+
+        // Iterate over all nodes in the graph
+        for (Node node : graph) {
+            // Retrieve node coordinates in graph units (GU)
+            // Retrieve node coordinates in graph units (GU)
+            Object xyzObject = node.getAttribute("xyz");
+            if (xyzObject == null) {
+//                            System.out.println("Node " + node.getId() + " position is null. Skipping.");
+                continue;
+            }
+
+            Object[] xyz = (Object[]) xyzObject; // Cast explicitly to Object[]
+            double nodeX = (double) xyz[0];
+            double nodeY = (double) xyz[1];
+
+            // Convert graph units (GU) to pixels
+            Point3 pixels = viewer.getDefaultView().getCamera().transformGuToPx(nodeX, nodeY, 0);
+            double pixelX = pixels.x;
+            double pixelY = pixels.y;
+
+//                        System.out.printf("Node %s: Graph position (%.3f, %.3f) --> Pixel position (%.0f, %.0f)%n",
+//                                node.getId(), nodeX, nodeY, pixelX, pixelY);
+            // Calculate the distance between the click and the node in pixel space
+            double distance = Math.sqrt(Math.pow(e.getX() - pixelX, 2) + Math.pow(e.getY() - pixelY, 2));
+//                        System.out.println("Distance from click to node " + node.getId() + ": " + distance);
+
+            // If the distance is within the threshold, change the node's color
+            if (distance < threshold) {
+//                            System.out.println("Node " + node.getId() + " clicked. Changing color to green.");
+                node.setAttribute("ui.style", "fill-color: green;");
+                Person person = table.get(node.getId());
+                String details = person.getDetailsByName(person.getName());
+                JOptionPane.showMessageDialog(rootPane, details);
+
+                nodeFound = true;
+                break;
+            }
+        }
+
+        if (!nodeFound) {
+            System.out.println("No node found close to the click position.");
+        }
     }
 
     public static void main(String[] args) {
