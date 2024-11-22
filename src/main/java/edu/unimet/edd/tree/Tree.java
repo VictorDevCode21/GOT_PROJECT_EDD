@@ -17,6 +17,7 @@ import org.graphstream.graph.Node;
 public class Tree implements HashTableListener {
 
     private HashTable table; // A hash table to store the people and their information
+    private TreeNode root; // Root node of the tree
 
     /**
      * Constructs a Tree object.
@@ -24,12 +25,59 @@ public class Tree implements HashTableListener {
     public Tree() {
         table = HashTable.getInstance();
         table.addListener(this);
+        this.root = getRoot(); // Initialize root node by calling getRoot method
     }
 
     @Override
     public void onHashTableUpdated() {
         // Synchronize the local HashTable instance with the singleton instance
         this.table.syncData(HashTable.getInstance());
+    }
+
+    /**
+     * Retrieves the root node of the genealogy tree. It searches through the
+     * hash table for a person whose father is "unknown" or null.
+     *
+     * @return The root node of the tree, or null if not found.
+     */
+    public TreeNode getRoot() {
+        // Iterate over all people in the hash table to find the root
+        for (Person person : table.getAllPeople()) {
+            if (person.getFather() == null || person.getFather().equalsIgnoreCase("unknown")) {
+                // Return the root node if a person with no father or an unknown father is found
+                return new TreeNode(person.getName(), null);
+            }
+        }
+        return null; // Return null if no root is found
+    }
+
+    /**
+     * Perform a breadth-first search (BFS) on the genealogy tree, starting from
+     * the root. It prints the names of the people in the tree in BFS order.
+     */
+    public void BFS() {
+        GenericLinkedList<TreeNode> queue = new GenericLinkedList<>(); // Create a new queue for BFS
+        TreeNode root = getRoot(); // Get the root of the tree
+
+        if (root == null) {
+            System.out.println("Tree is empty.");
+            return;
+        }
+
+        queue.add(root); // Enqueue the root node
+
+        while (!queue.isEmpty()) {
+            TreeNode current = queue.remove(); // Dequeue a node
+            System.out.println("Visited: " + current.getName()); // Process the node (e.g., print the name)
+
+            // Enqueue all children of the current node
+            GenericLinkedList<TreeNode> children = current.getChildren();
+            GenericNode<TreeNode> childNode = children.getFirst();
+            while (childNode != null) {
+                queue.add(childNode.getData()); // Enqueue each child
+                childNode = childNode.getNext();
+            }
+        }
     }
 
     /**
@@ -53,7 +101,6 @@ public class Tree implements HashTableListener {
         // Generate all possible unique identifiers for this person
         String fullNameKey = normalizeName(person.getName());
         String nicknameKey = person.getNickname() != null ? normalizeName(person.getNickname()) : null;
-
 
         // Check if this person already exists using any key
         if ((fullNameKey != null && table.get(fullNameKey) != null)
@@ -101,17 +148,17 @@ public class Tree implements HashTableListener {
 //                        System.out.println("Child eliminated: " + duplicatedChildName + " father: " + father.getName());
                     }
 
-            } else {
+                } else {
 //                System.out.println("Father " + fatherName + " not found in the HashTable.");
+                }
             }
-        }
 
-        // Add the person using all possible keys
-        addPersonToHashTable(person, fullNameKey, nicknameKey);
+            // Add the person using all possible keys
+            addPersonToHashTable(person, fullNameKey, nicknameKey);
 //        System.out.println("Person: " + person.getName() + " Father: " + person.getFather());
 
 //        System.out.println("Person added: " + person.getName());
-        // Debugging output: print the list of people in the HashTable
+            // Debugging output: print the list of people in the HashTable
 //        System.out.print("Lista de personas despues del metodo: [");
 //        Person[] allPeople = table.getAllPeople();
 //        for (int i = 0; i < allPeople.length; i++) {
