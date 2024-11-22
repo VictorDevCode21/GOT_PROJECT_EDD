@@ -1,8 +1,10 @@
 package edu.unimet.edd.interfaces;
 
+import edu.unimet.edd.hash.Entry;
 import edu.unimet.edd.tree.Tree;
 import edu.unimet.edd.utils.LoadJson;
 import edu.unimet.edd.utils.Person;
+import edu.unimet.edd.utils.LinkedList;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swing_viewer.SwingViewer;  // Use SwingViewer instead of Viewer
 import org.graphstream.ui.view.Viewer;
@@ -19,44 +21,117 @@ public class GenealogyGUI extends JFrame {
     private Tree tree;
     private JPanel graphPanel;
     private Viewer viewer;
-    private JTextField searchField;
-    private JButton searchButton;
+    private JTextField searchField; // Campo de texto para la búsqueda
+    private JButton searchButton; // Botón para activar la búsqueda
+    private JButton findMatchesButton; // Botón para encontrar coincidencias
 
     public GenealogyGUI() {
-        // Initialize the tree and other components
+        // Inicializar componentes
         this.tree = new Tree();
         setTitle("Genealogy Viewer");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
-        // Set up the layout
         setLayout(new BorderLayout());
 
-        // Initialize the graph panel
+        // Panel de grafo
         graphPanel = new JPanel(new BorderLayout());
         add(graphPanel, BorderLayout.CENTER);
 
-        // Set up the UI components (buttons, etc.)
+        // Panel de controles
         JPanel controlsPanel = new JPanel();
         JButton loadButton = new JButton("Load Tree");
-        loadButton.addActionListener(e -> loadTree());  // Action listener for the button
+        loadButton.addActionListener(e -> loadTree());
         controlsPanel.add(loadButton);
-        
-        // Adding search components
-        searchField = new JTextField(20); // Create the search text field
-        searchButton = new JButton("Search"); // Create the search button
 
-        // Add the search components to the controls panel
+        // Componentes de búsqueda
+        searchField = new JTextField(20);
+        searchButton = new JButton("Search");
+        findMatchesButton = new JButton("Find Matches");
+
         controlsPanel.add(new JLabel("Search Name:"));
         controlsPanel.add(searchField);
         controlsPanel.add(searchButton);
-
+        controlsPanel.add(findMatchesButton);
         add(controlsPanel, BorderLayout.SOUTH);
-        
-        // Search button action
-        searchButton.addActionListener(e -> searchPerson());
+
+        // Acciones de búsqueda
+        searchButton.addActionListener(e -> {
+            String name = searchField.getText().trim();
+            searchPerson(name);
+        });
+
+        findMatchesButton.addActionListener(e -> {
+            String nameSubstring = searchField.getText().trim();
+            findMatches(nameSubstring);
+        });
     }
+
+  /**
+   *
+   * 
+   * @param nameSubstring The substring to search for in the names of persons.
+   *                      The search is case-insensitive.
+   */
+private void findMatches(String nameSubstring) { 
+    // Verify that there is text to search
+    if (nameSubstring.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please enter a name or substring to search.", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // Get the matching persons
+    edu.unimet.edd.hash.LinkedList matchingPersons = tree.getTable().findMatchesIgnoreCase(nameSubstring);
+
+    // If no matches are found, display a message
+    if (matchingPersons.getSize() == 0) {
+        JOptionPane.showMessageDialog(this, "No matches found for: " + nameSubstring, "Information", JOptionPane.INFORMATION_MESSAGE);
+        return;
+    }
+
+    // Create a JDialog to display the matches
+    JDialog matchesDialog = new JDialog(this, "Matching Persons", true);
+    matchesDialog.setSize(400, 300);
+    matchesDialog.setLayout(new BorderLayout());
+
+    // Create a model for the JList
+    DefaultListModel<String> listModel = new DefaultListModel<>();
+    edu.unimet.edd.hash.Node current = matchingPersons.getFirstNode(); // First node in the list
+    while (current != null) {
+        @SuppressWarnings("unchecked")
+        Entry<String, Person> entry = (Entry<String, Person>) current.getValue();
+        Person person = entry.getValue();
+        // Add full name with title to the list model
+        String fullName = person.getName() + " " + person.getOfHisName() + " " + "of his name";
+        listModel.addElement(fullName);
+        current = current.getNext(); // Move to the next node
+    }
+
+    JList<String> matchesList = new JList<>(listModel);
+    JScrollPane scrollPane = new JScrollPane(matchesList);
+    matchesDialog.add(scrollPane, BorderLayout.CENTER);
+
+    // Button to select and view details of a person
+    JButton viewDetailsButton = new JButton("View Details");
+    matchesDialog.add(viewDetailsButton, BorderLayout.SOUTH);
+
+    // Action listener for the button to show details of the selected person
+    viewDetailsButton.addActionListener(e -> {
+        String selectedValue = matchesList.getSelectedValue();
+        if (selectedValue != null) {
+            // Use the full selected text to search for the person
+            matchesDialog.dispose(); // Close the matches window
+            searchPerson(selectedValue.trim()); // Show details of the person
+        } else {
+            JOptionPane.showMessageDialog(matchesDialog, "Please select a person.", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+    });
+
+    matchesDialog.setVisible(true);
+}
+
+
+    
 
     /**
      * Loads a genealogy tree from a JSON file selected by the user and
@@ -85,42 +160,6 @@ public class GenealogyGUI extends JFrame {
             }
         }
     }
-    
-    
-/**
- * Searches for a person by name and displays the result.
- */
-private void searchPerson() {
-    try {
-        // Retrieve the name entered in the search field, trimming extra spaces.
-        String nameToSearch = searchField.getText().trim(); 
-        
-        // Search for the person in the tree using the name provided.
-        Person foundPerson = tree.SearchTest(nameToSearch); 
-
-        if (foundPerson != null) {
-            // If the person is found, build a string containing their details.
-            String personDetails = "Name: " + foundPerson.getName() + "\n"
-                                 + "Title: " + (foundPerson.getTitle() != null ? foundPerson.getTitle() : "N/A") + "\n"
-                                 + "Father: " + (foundPerson.getFather() != null && !foundPerson.getFather().isEmpty() ? foundPerson.getFather() : "N/A") + "\n"
-                                 + "Mother: " + (foundPerson.getMother() != null && !foundPerson.getMother().isEmpty() ? foundPerson.getMother() : "N/A") + "\n"
-                                 + "Fate: " + (foundPerson.getFate() != null ? foundPerson.getFate() : "N/A") + "\n";
-
-            // Display the person's details in a popup dialog.
-            JOptionPane.showMessageDialog(this, personDetails, "Person Information", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            // If the person is not found, show an error message dialog.
-            JOptionPane.showMessageDialog(this, "Person not found.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    } catch (Exception e) {
-        // If an exception occurs, display an error message with the exception details.
-        JOptionPane.showMessageDialog(this, "An error occurred while searching for the person: " + e.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
-        // Print the stack trace for debugging purposes.
-        e.printStackTrace();}
-}
-  
-    
 
     /**
      * Updates the graph display with the current genealogy tree.
@@ -139,6 +178,55 @@ private void searchPerson() {
         graphPanel.revalidate();
         graphPanel.repaint();
     }
+
+/**
+ * Searches for a person by name and displays their details in a popup window.
+ *
+ * @param name The name of the person to search for.
+ */
+public void searchPerson(String name) {
+    Person person = tree.getPerson(name);
+
+    if (person == null) {
+        JOptionPane.showMessageDialog(null, "Person not found: " + name, "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Build the details string to display
+    StringBuilder details = new StringBuilder();
+    details.append("Name: ").append(person.getName()).append("\n");
+    details.append("Title: ").append(person.getTitle() != null ? person.getTitle() : "N/A").append("\n");
+    details.append("Nickname: ").append(person.getNickname() != null ? person.getNickname() : "N/A").append("\n");
+    details.append("Father: ").append(person.getFather() != null ? person.getFather() : "N/A").append("\n");
+    details.append("Mother: ").append(person.getMother() != null ? person.getMother() : "N/A").append("\n");
+    details.append("Fate: ").append(person.getFate() != null ? person.getFate() : "N/A").append("\n");
+    details.append("Of his name: ").append(person.getOfHisName() != null ? person.getOfHisName() : "N/A").append("\n");
+    details.append("Wed to: ").append(person.getWedTo() != null ? person.getWedTo() : "N/A").append("\n");
+    details.append("Eye color: ").append(person.getofEyes() != null ? person.getofEyes() : "N/A").append("\n");
+    details.append("Hair color: ").append(person.getofHair() != null ? person.getofHair() : "N/A").append("\n");
+    details.append("Notes: ").append(person.getNotes() != null ? person.getNotes() : "N/A").append("\n");
+
+    // Append children
+    details.append("Children: ");
+    if (!person.getChildren().isEmpty()) {
+        LinkedList.LinkedListIterator iterator = person.getChildren().iterator();
+        while (iterator.hasNext()) {
+            details.append(iterator.next());
+            if (iterator.hasNext()) {
+                details.append(", ");
+            }
+        }
+    } else {
+        details.append("None");
+    }
+    details.append("\n");
+
+    // Display the details in a dialog
+    JOptionPane.showMessageDialog(null, details.toString(), "Person Details", JOptionPane.INFORMATION_MESSAGE);
+}
+
+
+
 
     public static void main(String[] args) {
         // Run the GUI application

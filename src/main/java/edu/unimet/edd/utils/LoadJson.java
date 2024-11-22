@@ -84,66 +84,82 @@ public class LoadJson {
         }
     }
 
-    /**
-     * Parses the details of a person from the given JSON array.
-     *
-     * @param name The name of the person.
-     * @param personDetails The JSON array containing the person's details.
-     * @return A Person object with the parsed data.
-     */
-    private Person parsePersonDetails(String name, JSONArray personDetails) {
-        String title = null;
-        String nickname = null;
-        String father = null;
-        String mother = null;
-        String fate = null;
-        String ofHisName = null;
-        LinkedList children = new LinkedList();
+   /**
+    * Parses the details of a person from the given JSON array.
+   *
+   * @param name The name of the person.
+   * @param personDetails The JSON array containing the person's details.
+   * @return A Person object with the parsed data.
+   */
+private Person parsePersonDetails(String name, JSONArray personDetails) {
+    String title = null;
+    String nickname = null;
+    String father = null;
+    String mother = null;
+    String fate = null;
+    String ofHisName = null;
+    String wedTo = null;
+    String ofEyes = null;
+    String ofHair = null;
+    String notes = null;
+    LinkedList children = new LinkedList();
 
-        for (int i = 0; i < personDetails.length(); i++) {
-            JSONObject detail = personDetails.getJSONObject(i);
-            String key = detail.keys().next();
-            Object value = detail.get(key);
+    for (int i = 0; i < personDetails.length(); i++) {
+        JSONObject detail = personDetails.getJSONObject(i);
+        String key = detail.keys().next();
+        Object value = detail.get(key);
 
-            switch (key) {
-                case "Held title":
-                    title = (String) value;
-                    break;
-                case "Known throughout as":
-                    nickname = (String) value;
-                    break;
-                case "Born to":
-                    if (father == null) {
-                        father = (String) value;
-                    } else {
-                        mother = (String) value;
-                    }
-                    break;
-                case "Father to":
-                    if (value instanceof JSONArray) {
-                        JSONArray childrenArray = (JSONArray) value;
-                        for (int j = 0; j < childrenArray.length(); j++) {
-                            String childName = childrenArray.getString(j);
-                            // Use iterator to check for duplicates in children
-                            if (!isChildPresent(children, childName)) {
-                                children.addString(childName);
-                            }
+        switch (key) {
+            case "Held title":
+                title = (String) value;
+                break;
+            case "Known throughout as":
+                nickname = (String) value;
+                break;
+            case "Born to":
+                if (father == null) {
+                    father = (String) value;
+                } else {
+                    mother = (String) value;
+                }
+                break;
+            case "Father to":
+                if (value instanceof JSONArray) {
+                    JSONArray childrenArray = (JSONArray) value;
+                    for (int j = 0; j < childrenArray.length(); j++) {
+                        String childName = childrenArray.getString(j);
+                        // Use iterator to check for duplicates in children
+                        if (!isChildPresent(children, childName)) {
+                            children.addString(childName);
                         }
                     }
-                    break;
-                case "Fate":
-                    fate = (String) value;
-                    break;
-                case "Of his name":
-                    ofHisName = (String) value;
-                    break;
-                default:
-                    break;
-            }
+                }
+                break;
+            case "Fate":
+                fate = (String) value;
+                break;
+            case "Of his name":
+                ofHisName = (String) value;
+                break;
+            case "Wed to":
+                wedTo = (String) value;
+                break;
+            case "Of eyes":
+                ofEyes = (String) value;
+                break;
+            case "Of hair":
+                ofHair = (String) value;
+                break;
+            case "Notes":
+                notes = (String) value;
+                break;
+            default:
+                break;
         }
-
-        return new Person(name, title, nickname, father, mother, fate, ofHisName, children);
     }
+
+    return new Person(name, title, nickname, father, mother, fate, ofHisName, children, wedTo, ofEyes, ofHair, notes);
+}
 
     /**
      * Checks if a child is present in the list of children.

@@ -13,6 +13,10 @@ public class Person {
     private String fate;
     private LinkedList children;
     private String ofHisName;
+    private String ofEyes; // Eye color
+    private String ofHair; // Hair color
+    private String notes; // Additional notes about the person's life
+     private String wedTo; // Spouse's name
 
     /**
      * Constructs a new Person object.
@@ -25,8 +29,12 @@ public class Person {
      * @param fate The fate or notes about the person.
      * @param ofHisName The "Of his name" value for the person.
      * @param children A list of the person's children.
+     * @param wedTo The name of the person's spouse.
+     * @param ofEyes The person's eye color.
+     * @param ofHair The person's hair color.
+     * @param notes Additional notes about the person's life.
      */
-    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, LinkedList children) {
+    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, LinkedList children, String wedTo, String ofEyes, String ofHair, String notes) {
         this.name = name;
         this.title = title;
         this.nickname = nickname;
@@ -35,6 +43,10 @@ public class Person {
         this.fate = fate;
         this.ofHisName = ofHisName;
         this.children = children;
+        this.wedTo = wedTo;
+        this.ofEyes = ofEyes;
+        this.ofHair = ofHair;
+        this.notes = notes;
     }
 
     /**
@@ -180,6 +192,85 @@ public class Person {
     public void setOfHisName(String ofHisName) {
         this.ofHisName = ofHisName;
     }
+    
+   /**
+    *   
+    *
+    * @return the name of the spouse, or null if not wed.
+    */
+    public String getWedTo() {
+        return wedTo;
+    }
+    
+    
+  /**
+   * 
+   *
+   * @param wedTo the name of the spouse to set.
+   */
+   public void setWedTo(String wedTo) {
+        this.wedTo = wedTo;
+    }
+    
+    
+  /**
+   * 
+   *
+   * @return the eye color, or null if not specified.
+   */
+    public String getofEyes() {
+        return ofEyes;
+    }
+    
+    
+  /**
+   * 
+   *
+   * @param ofEyes the eye color to set.
+   */
+    public void setofEyes(String ofEyes) {
+        this.ofEyes = ofEyes;
+    }
+    
+    
+  /**
+   * 
+   *
+   * @return the hair color, or null if not specified.
+   */
+    public String getofHair() {
+        return ofHair;
+    }
+    
+  /**
+   * 
+   *
+   * @param ofHair the hair color to set.
+   */
+    public void setofHair(String ofHair) {
+        this.ofHair = ofHair;
+    }
+    
+    
+  /**
+   * 
+   *
+   * @return the notes, or null if none are specified.
+   */
+    public String getNotes() {
+        return notes;
+    }
+    
+    
+  /**
+   *
+   *
+   * @param notes the notes to set.
+   */
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
     /**
      * Updates the data of this Person object with new data from another Person
@@ -213,6 +304,19 @@ public class Person {
         }
         if (newPerson.getChildren() != null && newPerson.getChildren().size() > 0) {
             this.children = newPerson.getChildren();
+        }
+        
+        if (newPerson.getWedTo() != null && !newPerson.getWedTo().isEmpty()) {
+            this.wedTo = newPerson.getWedTo();
+        }
+        if (newPerson.getofEyes() != null && !newPerson.getofEyes().isEmpty()) {
+            this.ofEyes = newPerson.getofEyes();
+        }
+        if (newPerson.getofHair() != null && !newPerson.getofHair().isEmpty()) {
+            this.ofHair = newPerson.getofHair();
+        }
+        if (newPerson.getNotes() != null && !newPerson.getNotes().isEmpty()) {
+            this.notes = newPerson.getNotes();
         }
     }
 

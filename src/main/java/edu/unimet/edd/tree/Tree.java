@@ -22,6 +22,7 @@ public class Tree {
      */
     public Tree() {
         table = new HashTable();
+        
     }
 
     /**
@@ -35,6 +36,10 @@ public class Tree {
         String normalizedFullName = normalizeName(name);  // Normalize the name for comparison
         return table.get(normalizedFullName);  // Use the HashTable's get method to retrieve the person
     }
+    
+    
+    
+    
 
 //    /**
 //     * Adds a person and their relationships to the genealogy tree.
@@ -346,6 +351,19 @@ public Person SearchTest(String NameSearched) {
     // Retrieve the person object from the hash table using the normalized name.
     return table.get(normalizedFullName);
 }
+
+
+/**
+ *
+ * @return the hash table containing the key-value pairs of type <String, Person>
+ */
+public HashTable getTable() {
+        return table;
+    }
+
+
+
+
     
     
     

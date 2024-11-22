@@ -169,7 +169,7 @@ public class HashTable {
     /**
      * Returns an array of all values in the HashTable.
      *
-     * @return An array of all values stored in the HashTable.
+     * @return An array of all values stored in the HashTa
      */
     public Person[] values() {
         Person[] values = new Person[size]; // Create an array to store all values
@@ -212,6 +212,39 @@ public class HashTable {
 
         return keys; // Return the array of keys
     }
+    
+    /**
+     *
+     * @param nameSubstring The substring of the name to search for. The search is case-insensitive.
+     * @return An instance of {@link edu.unimet.edd.hash.LinkedList} containing the people
+     * whose names contain the given substring.
+     */ 
+   public edu.unimet.edd.hash.LinkedList findMatchesIgnoreCase(String nameSubstring) {
+       // Create a new linked list to store the matches
+    edu.unimet.edd.hash.LinkedList matchingPersons = new edu.unimet.edd.hash.LinkedList();
+    // Get all Person objects stored
+    Person[] allPeople = values();
+    
+    
+    // Iterate through all Person objects to find matches
+    for (Person person : allPeople) {
+        // Compare the person's name with the substring in a case-insensitive manner
+        if (person.getName().toLowerCase().contains(nameSubstring.toLowerCase())) {
+            // Use the `add` method of the hash list to store Person objects
+            matchingPersons.add(person.getName(), person);
+        }
+    }
+     // Return the list of matches
+    return matchingPersons;
+}
+
+
+
+
+
+    
+    
+    
 
 //    public void printTableContents() {
 //        System.out.println("HashTable contents:");
