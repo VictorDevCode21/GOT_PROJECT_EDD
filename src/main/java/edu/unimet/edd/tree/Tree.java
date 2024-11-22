@@ -6,6 +6,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import edu.unimet.edd.hash.HashTable;
 import edu.unimet.edd.listeners.HashTableListener;
+import javax.swing.JOptionPane;
 import org.graphstream.graph.Node;
 
 /**
@@ -16,7 +17,6 @@ import org.graphstream.graph.Node;
 public class Tree implements HashTableListener {
 
     private HashTable table; // A hash table to store the people and their information
-    private boolean foreFathersNeeded;
 
     /**
      * Constructs a Tree object.
@@ -54,8 +54,7 @@ public class Tree implements HashTableListener {
         String fullNameKey = normalizeName(person.getName());
         String nicknameKey = person.getNickname() != null ? normalizeName(person.getNickname()) : null;
 
-        // Debugging output to check the keys
-//        System.out.println("Adding person with full name key: " + fullNameKey + " and nickname key: " + nicknameKey);
+
         // Check if this person already exists using any key
         if ((fullNameKey != null && table.get(fullNameKey) != null)
                 || (nicknameKey != null && table.get(nicknameKey) != null)) {
@@ -82,13 +81,7 @@ public class Tree implements HashTableListener {
                     }
 
                     String current = getFirstAndLastName(temp);
-
-//                    System.out.println("Temp: " + temp);
-//                    System.out.println("El current es: " + current + " es igual a :" + fatherName);
                     if (current.equalsIgnoreCase(fatherName)) {
-//                        System.out.println("Founded: " + temp + " father " + fatherName);
-//                        System.out.println("Temp: " + temp);
-//                        System.out.println("Father: " + fatherName);
                         father = table.get(temp);
                     }
                 }
@@ -108,24 +101,6 @@ public class Tree implements HashTableListener {
 //                        System.out.println("Child eliminated: " + duplicatedChildName + " father: " + father.getName());
                     }
 
-                    // Check if the duplicate child was removed
-//                    if (table.get(duplicatedChildName) == null) {
-//                        System.out.println("Successfully removed duplicated child: " + duplicatedChildName);
-//                    } else {
-//                        System.out.println("Failed to remove duplicated child: " + duplicatedChildName);
-//                    }
-                    // Ensure the father does not reference the removed child
-//                    father.getChildren().remove(duplicatedChildName);
-//                    if (father.getChildren().get(duplicatedChildName) != null)
-//                        System.out.println("Child's not in the list" + duplicatedChildName);
-                }
-
-                // Now add the current person as a child of the father
-//                if (table.get(duplicatedChildName) == null || !duplicatedChildName.equalsIgnoreCase(person.getName())) {
-////                    System.out.println("added: " + person.getName());
-//                    father.getChildren().addString(person.getName());
-//
-//                }
             } else {
 //                System.out.println("Father " + fatherName + " not found in the HashTable.");
             }
@@ -170,6 +145,23 @@ public class Tree implements HashTableListener {
 //                }
 //            }
 //        }
+        }
+    }
+
+    /**
+     * Adds a person to the hash table using multiple keys.
+     *
+     * @param person The Person object to add.
+     * @param fullNameKey The full name key of the person.
+     * @param nicknameKey The nickname key of the person (if available).
+     */
+    private void addPersonToHashTable(Person person, String fullNameKey, String nicknameKey) {
+        if (fullNameKey != null) {
+            table.put(fullNameKey, person);
+        }
+        if (nicknameKey != null) {
+            table.put(nicknameKey, person);
+        }
     }
 
     /**
@@ -180,7 +172,7 @@ public class Tree implements HashTableListener {
      * person.
      * @return A Graph object representing the genealogy tree or forefathers.
      */
-    public Graph createGraph(String personToLookfor, boolean foreFathersNeeded) {
+    public Graph createGraph(String personToLookfor, boolean foreFathersNeeded, PersonLinkedList titleHolders) {
         Graph graph = new SingleGraph("GenealogyTree");
 
         // Set graph attributes
@@ -190,10 +182,55 @@ public class Tree implements HashTableListener {
         // If no foreFathers needes, we load all the lineage        
         if (foreFathersNeeded) {
             loadForeFathersGraph(personToLookfor, graph);
+        } else if (titleHolders != null) {
+            loadTitleHoldersGraph(graph, titleHolders);
         } else {
             loadAllLineageGraph(graph);
         }
         return graph;
+    }
+
+    /**
+     * Loads a graph with nodes representing title holders and ensures that all
+     * nodes are interconnected through edges. If a person is not found in the
+     * hash table, a warning is printed to the console.
+     *
+     * @param graph The graph where the nodes and edges will be added.
+     * @param titleHolders A PersonLinkedList containing the names of title
+     * holders to be added to the graph.
+     */
+    private void loadTitleHoldersGraph(Graph graph, PersonLinkedList titleHolders) {
+        // List to keep track of previously created nodes for edge creation
+        PersonLinkedList createdNodes = new PersonLinkedList();
+
+        for (String personName : titleHolders.getAllPersons()) {
+            // Retrieve the person from the hash table
+            Person newPerson = table.get(personName);
+
+            if (newPerson == null) {
+                System.out.println("Person not found in the HashTable: " + personName);
+                continue; // Skip if person is not found
+            }
+
+            // Check if the node for this person already exists
+            if (graph.getNode(personName) == null) {
+                // Add the node to the graph with its label
+                graph.addNode(personName).setAttribute("ui.label", personName);
+            }
+
+            // Create edges between the current node and all previously created nodes
+            for (String existingNode : createdNodes.getAllPersons()) {
+                String edgeId = existingNode + "-" + personName;
+
+                // Ensure the edge does not already exist before adding
+                if (graph.getEdge(edgeId) == null) {
+                    graph.addEdge(edgeId, existingNode, personName);
+                }
+            }
+
+            // Add the current node to the list of created nodes
+            createdNodes.addString(personName);
+        }
     }
 
     /**
@@ -273,6 +310,32 @@ public class Tree implements HashTableListener {
         }
     }
 
+    /**
+     * Populates the graph with all individuals and their parental relationships
+     * from the HashTable. This method adds nodes for all people and creates
+     * edges to represent father-child relationships.
+     *
+     * <p>
+     * The process is divided into two main steps:</p>
+     * <ol>
+     * <li>Add all individuals as nodes in the graph.</li>
+     * <li>Add edges to connect children with their respective fathers, ensuring
+     * the relationships are correctly established.</li>
+     * </ol>
+     *
+     * <p>
+     * For each father-child relationship:</p>
+     * <ul>
+     * <li>If the father's node does not already exist, the method searches for
+     * it using either the father's nickname or their first and last names
+     * within the HashTable.</li>
+     * <li>An edge is added only if both the father and child nodes exist in the
+     * graph.</li>
+     * </ul>
+     *
+     * @param graph The Graph object where nodes and edges will be added to
+     * represent the lineage of all individuals.
+     */
     private void loadAllLineageGraph(Graph graph) {
         // Step 1: Add all people as nodes
         {
@@ -363,22 +426,6 @@ public class Tree implements HashTableListener {
             return fullName; // Return as is if less than two words
         }
         return parts[0] + " " + parts[1]; // Return the first and second word
-    }
-
-    /**
-     * Adds a person to the hash table using multiple keys.
-     *
-     * @param person The Person object to add.
-     * @param fullNameKey The full name key of the person.
-     * @param nicknameKey The nickname key of the person (if available).
-     */
-    private void addPersonToHashTable(Person person, String fullNameKey, String nicknameKey) {
-        if (fullNameKey != null) {
-            table.put(fullNameKey, person);
-        }
-        if (nicknameKey != null) {
-            table.put(nicknameKey, person);
-        }
     }
 
     /**
