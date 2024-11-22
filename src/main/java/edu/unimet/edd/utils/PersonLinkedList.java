@@ -53,6 +53,28 @@ public class PersonLinkedList {
     }
 
     /**
+     * Returns an array with the names of all persons in the list.
+     *
+     * @return A String array containing all person names in the list.
+     */
+    public String[] getAllPersons() {
+        if (this.isEmpty()) {
+            return new String[0]; // Devuelve un array vacío en lugar de null
+        }
+
+        String[] persons = new String[size];
+        Node current = head;
+        int index = 0;
+
+        while (current != null) {
+            persons[index++] = current.getValue();
+            current = current.getNext();
+        }
+
+        return persons;
+    }
+
+    /**
      * Returns the element at the specified index.
      *
      * @param index The index of the element to retrieve.
