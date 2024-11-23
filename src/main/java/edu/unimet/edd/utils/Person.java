@@ -18,6 +18,7 @@ public class Person {
     private String hairColor = null;
     private String notes = null;
     private String wedTo = null;
+    private Integer generation = null;
     private PersonLinkedList children;
 
     /**
@@ -32,7 +33,7 @@ public class Person {
      * @param ofHisName The "Of his name" value for the person.
      * @param children A list of the person's children.
      */
-    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, String eyesColor, String hairColor, String notes, String wedTo, PersonLinkedList children) {
+    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, String eyesColor, String hairColor, String notes, String wedTo, Integer generation ,PersonLinkedList children) {
         this.name = name;
         this.title = title;
         this.nickname = nickname;
@@ -44,6 +45,7 @@ public class Person {
         this.hairColor = hairColor;
         this.notes = notes;
         this.wedTo = wedTo;
+        this.generation = generation;
         this.children = children;
     }
 
@@ -381,6 +383,20 @@ public class Person {
      */
     public void setWedTo(String wedTo) {
         this.wedTo = wedTo;
+    }
+
+    /**
+     * @return the generation
+     */
+    public Integer getGeneration() {
+        return generation;
+    }
+
+    /**
+     * @param generation the generation to set
+     */
+    public void setGeneration(Integer generation) {
+        this.generation = generation;
     }
 
 }
