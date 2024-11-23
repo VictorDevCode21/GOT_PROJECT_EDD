@@ -1,5 +1,7 @@
 package edu.unimet.edd.utils;
 
+import edu.unimet.edd.hash.HashTable;
+
 /**
  * Represents a person in the genealogy tree.
  */
@@ -11,8 +13,13 @@ public class Person {
     private String father;
     private String mother;
     private String fate;
-    private LinkedList children;
     private String ofHisName;
+    private String eyesColor = null;
+    private String hairColor = null;
+    private String notes = null;
+    private String wedTo = null;
+    private Integer generation = null;
+    private PersonLinkedList children;
 
     /**
      * Constructs a new Person object.
@@ -26,7 +33,7 @@ public class Person {
      * @param ofHisName The "Of his name" value for the person.
      * @param children A list of the person's children.
      */
-    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, LinkedList children) {
+    public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, String eyesColor, String hairColor, String notes, String wedTo, Integer generation ,PersonLinkedList children) {
         this.name = name;
         this.title = title;
         this.nickname = nickname;
@@ -34,6 +41,11 @@ public class Person {
         this.mother = mother;
         this.fate = fate;
         this.ofHisName = ofHisName;
+        this.eyesColor = eyesColor;
+        this.hairColor = hairColor;
+        this.notes = notes;
+        this.wedTo = wedTo;
+        this.generation = generation;
         this.children = children;
     }
 
@@ -55,18 +67,154 @@ public class Person {
 
         @Override
         public boolean hasNext() {
-            return currentIndex < children.size();
+            return currentIndex < getChildren().size();
         }
 
         @Override
         public String next() {
             if (hasNext()) {
-                String child = children.get(currentIndex);
+                String child = getChildren().get(currentIndex);
                 currentIndex++;
                 return child;
             }
             return null;
         }
+    }
+
+    /**
+     * Retrieves the details of this person in a formatted string if the given
+     * name matches this person's name.
+     *
+     * @param name The name of the person to retrieve details for.
+     * @return A formatted string containing the person's details, or null if
+     * the name does not match.
+     */
+    public String getDetailsByName(String name) {
+        if (this.getName().equalsIgnoreCase(name)) {
+            StringBuilder details = new StringBuilder();
+            details.append("Details of the person: \n");
+            details.append("Name: ").append(this.getName()).append("\n");
+            details.append("Title: ").append(this.getTitle() != null ? this.getTitle() : "None").append("\n");
+            details.append("Nickname: ").append(this.getNickname() != null ? this.getNickname() : "None").append("\n");
+            details.append("Father: ").append(this.getFather() != null ? this.getFather() : "Unknown").append("\n");
+            details.append("Mother: ").append(this.getMother() != null ? this.getMother() : "Unknown").append("\n");
+            details.append("Fate: ").append(this.getFate() != null ? this.getFate() : "Unknown").append("\n");
+            details.append("Of His Name: ").append(this.getOfHisName() != null ? this.getOfHisName() : "Unknown").append("\n");
+            details.append("Eyes color: ").append(this.getEyesColor() != null ? this.getEyesColor() : "Unknown").append("\n");
+            details.append("Hair color: ").append(this.getHairColor() != null ? this.getHairColor() : "Unknown").append("\n");
+            details.append("Notes: ").append(this.getNotes() != null ? this.getNotes() : "Unknown").append("\n");
+            details.append("Wed to: ").append(this.getWedTo() != null ? this.getWedTo() : "Unknown").append("\n");
+
+            
+            details.append("Children: ");
+            if (this.getChildren() != null && this.getChildren().size() > 0) {
+                for (int i = 0; i < this.getChildren().size(); i++) {
+                    details.append(this.getChildren().get(i));
+                    if (i < this.getChildren().size() - 1) {
+                        details.append(", ");
+                    }
+                }
+            } else {
+                details.append("None");
+            }
+
+            return details.toString();
+        }
+        return null; // Name does not match
+    }
+
+    /**
+     * Updates the data of this Person object with new data from another Person
+     * object. Only non-null and non-empty fields in the new Person are used for
+     * the update.
+     *
+     * @param newPerson The Person object containing new data to update this
+     * object.
+     */
+    public void updateData(Person newPerson) {
+        if (!newPerson.getName().isEmpty()) {
+            this.setName(newPerson.getName());
+        }
+        if (newPerson.getTitle() != null && !newPerson.getTitle().isEmpty()) {
+            this.setTitle(newPerson.getTitle());
+        }
+        if (newPerson.getNickname() != null && !newPerson.getNickname().isEmpty()) {
+            this.setNickname(newPerson.getNickname());
+        }
+        if (newPerson.getFather() != null && !newPerson.getFather().isEmpty()) {
+            this.setFather(newPerson.getFather());
+        }
+        if (newPerson.getMother() != null && !newPerson.getMother().isEmpty()) {
+            this.setMother(newPerson.getMother());
+        }
+        if (newPerson.getFate() != null && !newPerson.getFate().isEmpty()) {
+            this.setFate(newPerson.getFate());
+        }
+        if (newPerson.getOfHisName() != null && !newPerson.getOfHisName().isEmpty()) {
+            this.setOfHisName(newPerson.getOfHisName());
+        }
+        if (newPerson.getChildren() != null && newPerson.getChildren().size() > 0) {
+            this.setChildren(newPerson.getChildren());
+        }
+    }
+
+    /**
+     * Extracts the first name from a full name string.
+     *
+     * @param fullName The full name string.
+     * @return The first name extracted from the full name.
+     */
+    private String getFirstName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            return "";
+        }
+        String[] parts = fullName.split("\\s+");
+        return parts[0]; // Returns the first part of the name
+    }
+
+    /**
+     * Checks if a child is already present in the parent's list of children. If
+     * a duplicate is found, it removes the existing child from both the
+     * parent's children list and the HashTable.
+     *
+     * @param parent The parent Person object.
+     * @param childName The name of the child to check.
+     * @param hashTable The HashTable containing all the persons (for removal).
+     * @return True if the child was a duplicate (and removed from both the list
+     * and HashTable), false otherwise.
+     */
+    public String checkDuplicateChild(Person parent, String childName, HashTable hashTable) {
+        if (parent == null) {
+            return null; // No parent means no duplicates
+        }
+
+        String newChildFirstName = getFirstName(childName);
+//        System.out.println("Trying to add: " + childName);
+
+        PersonLinkedList currentChildren = parent.getChildren();
+//        System.out.println("Showing father: " + parent.getName());
+        if (currentChildren == null) {
+            return null; // No children list means no duplicates
+        }
+
+//        System.out.println("Showing children: ");
+        for (int i = 0; i < currentChildren.size(); i++) {
+//            System.out.println("lista de hijos: " + currentChildren.get(i));
+        }
+
+        // Check for duplicates
+        for (int i = 0; i < currentChildren.size(); i++) {
+            String existingChildFirstName = getFirstName(currentChildren.get(i));
+            String currentChild = currentChildren.get(i);
+
+            // If duplicate is found, remove the existing child from both the list and HashTable
+            if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
+//                System.out.println("Removed duplicate: " + currentChild.toLowerCase() + " his father is: " +  parent.getName());
+                return currentChild.toLowerCase(); // A duplicate was found and removed from both the list and HashTable
+            }
+        }
+
+        return null; // No duplicate found
     }
 
     /**
@@ -156,14 +304,14 @@ public class Person {
     /**
      * @return the children
      */
-    public LinkedList getChildren() {
+    public PersonLinkedList getChildren() {
         return children;
     }
 
     /**
      * @param children the children to set
      */
-    public void setChildren(LinkedList children) {
+    public void setChildren(PersonLinkedList children) {
         this.children = children;
     }
 
@@ -182,97 +330,73 @@ public class Person {
     }
 
     /**
-     * Updates the data of this Person object with new data from another Person
-     * object. Only non-null and non-empty fields in the new Person are used for
-     * the update.
-     *
-     * @param newPerson The Person object containing new data to update this
-     * object.
+     * @return the eyesColor
      */
-    public void updateData(Person newPerson) {
-        if (!newPerson.getName().isEmpty()) {
-            this.name = newPerson.getName();
-        }
-        if (newPerson.getTitle() != null && !newPerson.getTitle().isEmpty()) {
-            this.title = newPerson.getTitle();
-        }
-        if (newPerson.getNickname() != null && !newPerson.getNickname().isEmpty()) {
-            this.nickname = newPerson.getNickname();
-        }
-        if (newPerson.getFather() != null && !newPerson.getFather().isEmpty()) {
-            this.father = newPerson.getFather();
-        }
-        if (newPerson.getMother() != null && !newPerson.getMother().isEmpty()) {
-            this.mother = newPerson.getMother();
-        }
-        if (newPerson.getFate() != null && !newPerson.getFate().isEmpty()) {
-            this.fate = newPerson.getFate();
-        }
-        if (newPerson.getOfHisName() != null && !newPerson.getOfHisName().isEmpty()) {
-            this.ofHisName = newPerson.getOfHisName();
-        }
-        if (newPerson.getChildren() != null && newPerson.getChildren().size() > 0) {
-            this.children = newPerson.getChildren();
-        }
+    public String getEyesColor() {
+        return eyesColor;
     }
 
     /**
-     * Extracts the first name from a full name string.
-     *
-     * @param fullName The full name string.
-     * @return The first name extracted from the full name.
+     * @param eyesColor the eyesColor to set
      */
-    private String getFirstName(String fullName) {
-        if (fullName == null || fullName.isEmpty()) {
-            return "";
-        }
-        String[] parts = fullName.split("\\s+");
-        return parts[0]; // Returns the first part of the name
+    public void setEyesColor(String eyesColor) {
+        this.eyesColor = eyesColor;
     }
 
     /**
-     * Checks if a child is already present in the parent's list of children.
-     *
-     * @param parent The parent Person object.
-     * @param childName The name of the child to check.
-     * @return True if the child is a duplicate, false otherwise.
+     * @return the hairColor
      */
-    public boolean checkDuplicateChild(Person parent, String childName) {
-        if (parent == null) {
-//            System.out.println("Parent is null. Cannot check for duplicate children.");
-            return false; // No parent means no duplicates
-        }
+    public String getHairColor() {
+        return hairColor;
+    }
 
-        LinkedList currentChildren = parent.getChildren();
-        if (currentChildren == null) {
-//            System.out.println("Parent " + parent.getName() + " has no children list. Cannot check for duplicates.");
-            return false; // No children list means no duplicates
-        }
+    /**
+     * @param hairColor the hairColor to set
+     */
+    public void setHairColor(String hairColor) {
+        this.hairColor = hairColor;
+    }
 
-        String newChildFirstName = getFirstName(childName);
+    /**
+     * @return the notes
+     */
+    public String getNotes() {
+        return notes;
+    }
 
-//        System.out.println("Checking for duplicate child...");
-//        System.out.println("Parent: " + parent.getName());
-//        System.out.println("Attempting to add child: " + childName + " (" + newChildFirstName + ")");
-//        System.out.println("Current children of " + parent.getName() + ":");
+    /**
+     * @param notes the notes to set
+     */
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
-        // Print the current list of children
-        for (int i = 0; i < currentChildren.size(); i++) {
-//            System.out.println("- " + currentChildren.get(i));
-        }
+    /**
+     * @return the wedTo
+     */
+    public String getWedTo() {
+        return wedTo;
+    }
 
-        // Check for duplicates
-        for (int i = 0; i < currentChildren.size(); i++) {
-            String existingChildFirstName = getFirstName(currentChildren.get(i));
-//            System.out.println("Comparing with existing child: " + currentChildren.get(i) + " (" + existingChildFirstName + ")");
-            if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
-//                System.out.println("Duplicate detected: " + newChildFirstName + " already exists as a child of " + parent.getName());
-                return true; // A duplicate is found
-            }
-        }
+    /**
+     * @param wedTo the wedTo to set
+     */
+    public void setWedTo(String wedTo) {
+        this.wedTo = wedTo;
+    }
 
-//        System.out.println("No duplicate found: " + newChildFirstName + " can be added as a child of " + parent.getName());
-        return false; // No duplicates found
+    /**
+     * @return the generation
+     */
+    public Integer getGeneration() {
+        return generation;
+    }
+
+    /**
+     * @param generation the generation to set
+     */
+    public void setGeneration(Integer generation) {
+        this.generation = generation;
     }
 
 }

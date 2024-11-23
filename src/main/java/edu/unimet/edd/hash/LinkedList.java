@@ -51,6 +51,37 @@ public class LinkedList {
     }
 
     /**
+     * Removes the node with the specified key from the LinkedList.
+     *
+     * @param key the key of the entry to remove
+     * @return true if the entry was removed, false if the key was not found
+     */
+    public boolean remove(String key) {
+        if (first == null) {
+            return false; // List is empty
+        }
+
+        // Special case: if the first node has the key
+        if (first.getValue().getKey().equals(key)) {
+            first = first.getNext(); // Remove the first node
+            size--;
+            return true;
+        }
+
+        // General case: traverse the list and remove the node with the key
+        Node current = first;
+        while (current.getNext() != null) {
+            if (current.getNext().getValue().getKey().equals(key)) {
+                current.setNext(current.getNext().getNext()); // Bypass the node to be removed
+                size--;
+                return true;
+            }
+            current = current.getNext();
+        }
+        return false; // Key not found
+    }
+
+    /**
      * Removes and returns the first element of the LinkedList.
      *
      * @return the removed element (Entry<String, Person>)

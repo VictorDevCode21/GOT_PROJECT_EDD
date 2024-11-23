@@ -9,6 +9,7 @@ import edu.unimet.edd.interfaces.GenealogyGUI;
 public class GAME_OF_THRONES {
 
     public static void main(String[] args) {
+
         GenealogyGUI gui = new GenealogyGUI();
         gui.show();
     }

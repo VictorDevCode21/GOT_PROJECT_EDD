@@ -4,12 +4,12 @@ package edu.unimet.edd.utils;
  * A simple implementation of a LinkedList. This class stores elements and
  * allows access to them by index.
  */
-public class LinkedList {
+public class PersonLinkedList {
 
     private Node head;  // Head node of the list
     private int size;   // Size of the list
 
-    public LinkedList() {
+    public PersonLinkedList() {
         this.head = null;
         this.size = 0;
     }
@@ -53,6 +53,28 @@ public class LinkedList {
     }
 
     /**
+     * Returns an array with the names of all persons in the list.
+     *
+     * @return A String array containing all person names in the list.
+     */
+    public String[] getAllPersons() {
+        if (this.isEmpty()) {
+            return new String[0]; // Devuelve un array vacío en lugar de null
+        }
+
+        String[] persons = new String[size];
+        Node current = head;
+        int index = 0;
+
+        while (current != null) {
+            persons[index++] = current.getValue();
+            current = current.getNext();
+        }
+
+        return persons;
+    }
+
+    /**
      * Returns the element at the specified index.
      *
      * @param index The index of the element to retrieve.
@@ -85,7 +107,60 @@ public class LinkedList {
     }
 
     /**
-     * Returns an iterator for this LinkedList.
+     * Retrieves an element from the linked list based on its value.
+     *
+     * @param value The string value to search for.
+     * @return The value if found, otherwise null.
+     */
+    public String get(String value) {
+        Node current = head;
+        while (current != null) {
+            if (current.getValue().equals(value)) {
+                return current.getValue();
+            }
+            current = current.getNext();
+        }
+        // If the value is not found, return null
+        return null;
+    }
+
+    /**
+     * Removes the first occurrence of a specified value from the
+     * PersonLinkedList.
+     *
+     * @param value The value to remove from the list.
+     * @return true if the value was found and removed, false otherwise.
+     */
+    public boolean remove(String value) {
+        if (head == null) {
+            return false; // List is empty, nothing to remove
+        }
+
+        // Special case: the value to remove is at the head of the list
+        if (head.getValue().equals(value)) {
+            head = head.getNext(); // Move head to the next node
+            size--;
+            return true;
+        }
+
+        // Traverse the list to find the node to remove
+        Node current = head;
+        while (current.getNext() != null) {
+            if (current.getNext().getValue().equals(value)) {
+                // Found the node, remove it by skipping it
+                current.setNext(current.getNext().getNext());
+                size--;
+                return true;
+            }
+            current = current.getNext();
+        }
+
+        // If we reach here, the value was not found
+        return false;
+    }
+
+    /**
+     * Returns an iterator for this PersonLinkedList.
      *
      * @return A new iterator for the list.
      */
@@ -94,7 +169,7 @@ public class LinkedList {
     }
 
     /**
-     * Iterator class for LinkedList.
+     * Iterator class for PersonLinkedList.
      */
     public class LinkedListIterator implements Iterator<String> {
 
@@ -131,7 +206,23 @@ public class LinkedList {
     }
 
     /**
-     * A Node class to represent each element in the LinkedList.
+     * Converts the linked list to an array of strings.
+     *
+     * @return An array of strings representing the values in the list.
+     */
+    public String[] toArray() {
+        String[] array = new String[size];
+        Node current = head;
+        int index = 0;
+        while (current != null) {
+            array[index++] = current.getValue();
+            current = current.getNext();
+        }
+        return array;
+    }
+
+    /**
+     * A Node class to represent each element in the PersonLinkedList.
      */
     private class Node {
 
