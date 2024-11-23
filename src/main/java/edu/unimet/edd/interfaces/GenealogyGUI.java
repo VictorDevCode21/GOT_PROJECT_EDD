@@ -356,9 +356,35 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         }
     }
 
+    /**
+     * Displays a dialog allowing the user to search for a person by name. The
+     * user is prompted to input a name, and the system searches for matching
+     * names in the tree. If matches are found, a list of names is displayed for
+     * the user to select from. Once a name is selected, the system can update
+     * the graph display based on the selected person.
+     *
+     * <p>
+     * If no matches are found or an error occurs during the process,
+     * appropriate messages are shown to the user.</p>
+     *
+     * <p>
+     * This method includes the following steps:</p>
+     * <ul>
+     * <li>Prompts the user to input a name.</li>
+     * <li>Searches for matching names in the tree.</li>
+     * <li>If matches are found, displays a list of results for the user to
+     * select from.</li>
+     * <li>Updates the graph display with the selected name.</li>
+     * <li>Handles cases where no name is entered or selected.</li>
+     * <li>Catches and displays any errors that occur during the process.</li>
+     * </ul>
+     *
+     * @throws Exception if an error occurs while processing the name input or
+     * updating the graph.
+     */
     private void showByName() {
         try {
-            // Solicita al usuario que introduzca un nombre o parte de un nombre
+            // Prompt the user to input a name or part of a name
             String name = JOptionPane.showInputDialog(
                     this,
                     "Introduce a name: ",
@@ -366,6 +392,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     JOptionPane.QUESTION_MESSAGE
             );
 
+            // Check if the input name is null or empty
             if (name == null || name.isEmpty()) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -376,7 +403,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 return;
             }
 
-            // Busca coincidencias en el árbol
+            // Search for matches in the tree
             GenericLinkedList coincidences = tree.findPersonByName(name);
 
             if (coincidences == null || coincidences.getSize() == 0) {
@@ -389,18 +416,18 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 return;
             }
 
-            // Convierte las coincidencias a un array de Strings para el JList
+            // Convert the coincidences to a String array for the JList
             String[] names = coincidences.toArray();
 
-            // Crea un JList para mostrar los nombres
+            // Create a JList to display the names
             JList<String> nameList = new JList<>(names);
             nameList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             nameList.setVisibleRowCount(5); // Número visible de filas
 
-            // Añade el JList a un JScrollPane
+            // Display the dialog for the user to select a name
             JScrollPane scrollPane = new JScrollPane(nameList);
 
-            // Muestra el cuadro de diálogo para que el usuario seleccione un nombre
+            // Check if the user selected a name
             int result = JOptionPane.showConfirmDialog(
                     this,
                     scrollPane,
@@ -420,7 +447,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                             JOptionPane.INFORMATION_MESSAGE
                     );
 
-                    // Aquí puedes agregar la lógica para manejar la selección
+                    // Logic to handle the selection (e.g., update graph display)
                     // Update graph display with the name of the person to find its descent
                     updateGraphDisplay(null, false, null, null, selectedName);
 
