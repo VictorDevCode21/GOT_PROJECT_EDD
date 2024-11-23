@@ -2,7 +2,10 @@ package edu.unimet.edd.interfaces;
 
 import edu.unimet.edd.hash.HashTable;
 import edu.unimet.edd.listeners.HashTableListener;
+import edu.unimet.edd.tree.GenericLinkedList;
+import edu.unimet.edd.tree.GenericNode;
 import edu.unimet.edd.tree.Tree;
+import edu.unimet.edd.tree.TreeNode;
 import edu.unimet.edd.utils.LoadJson;
 import edu.unimet.edd.utils.Person;
 import edu.unimet.edd.utils.PersonLinkedList;
@@ -18,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.commons.math3.util.Pair;
 import org.graphstream.graph.Node;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.ui.geom.Point3;
@@ -111,7 +115,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         JButton seeRegisterButton = new JButton("See Register");
         seeRegisterButton.addActionListener(e -> {
             if (jsonLoaded) {
-                updateGraphDisplay(null, false, null);
+                updateGraphDisplay(null, false, null, null);
             } else {
                 JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
                 return;
@@ -143,6 +147,17 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             }
         });
         controlsPanel.add(showTitleHoldersButton);
+
+        // Button to execute event for showing title holders
+        JButton showGenerationButton = new JButton("Show Generation");
+        showGenerationButton.addActionListener(e -> {
+            if (jsonLoaded) {
+                showGenerationMembers();
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+            }
+        });
+        controlsPanel.add(showGenerationButton);
 
     }
 
@@ -198,10 +213,10 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
      * @param foreFathersNeeded Flag to display only forefathers.
      * @param titleName List of title holders to display, or null for none.
      */
-    private void updateGraphDisplay(String personToLookFor, boolean foreFathersNeeded, PersonLinkedList titleName) {
+    private void updateGraphDisplay(String personToLookFor, boolean foreFathersNeeded, PersonLinkedList titleName, Integer generationNumber) {
         try {
             // Create the graph based on the current tree data
-            Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded, titleName);
+            Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded, titleName, generationNumber);
 
 //        System.out.println("Table size in GenealogyGUI: " + table.size());
             // If a viewer already exists, close its previous view to avoid conflicts
@@ -251,12 +266,69 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             graphPanel.add(view, BorderLayout.CENTER);
             graphPanel.revalidate();
             graphPanel.repaint();
-        } catch (NullPointerException e) {
-            System.out.println("Null Pointer Error: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, "Unable to retrieve graph data. Please ensure the data is correctly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
+//        } catch (NullPointerException e) {
+//            System.out.println("Null Pointer Error: " + e.getMessage());
+//            JOptionPane.showMessageDialog(this, "Unable to retrieve graph data. Please ensure the data is correctly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             System.out.println("Unexpected Error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Assigns a generation number to each person in the genealogy tree based on
+     * their level in the tree and updates the HashTable with the changes.
+     */
+    private void showGenerationMembers() {
+        if (!jsonLoaded) {
+            JOptionPane.showMessageDialog(this, "You need to load a JSON file first.");
+            return;
+        }
+
+        // Retrieve the root of the tree
+        TreeNode root = tree.getRoot();
+
+        if (root == null) {
+            JOptionPane.showMessageDialog(this, "The tree is empty.");
+            return;
+        }
+
+        tree.setFatherForUndetailedChildren();
+
+        // Use the BFS method from the Tree class
+        Integer totalGenerations = tree.BFS(node -> {
+
+        });
+        
+        // Due to the iteration of bfs, less 1 to the max value of generations
+        totalGenerations = totalGenerations -1;
+        
+
+        // Show the total number of generations (equal to the depth of the tree)
+        JOptionPane.showMessageDialog(this,
+                "Generations have been assigned based on the " + totalGenerations + " levels.",
+                "Generations Info", JOptionPane.INFORMATION_MESSAGE);
+
+        // Prompt the user to select a generation
+        Integer selectedGeneration = -1;
+        try {
+            String input = JOptionPane.showInputDialog(
+                    this, "Select a generation number that must be less or equal to: " + (totalGenerations),
+                    "Select Generation", JOptionPane.QUESTION_MESSAGE
+            );
+            if (input != null) {
+                selectedGeneration = Integer.parseInt(input);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid generation number.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (selectedGeneration != -1) {
+            updateGraphDisplay(null, false, null, selectedGeneration);
+        } else {
+            return;
         }
     }
 
@@ -305,7 +377,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             }
 
             try {
-                updateGraphDisplay(null, false, titleHolders);
+                updateGraphDisplay(null, false, titleHolders, null);
             } catch (Exception e) {
                 System.out.println("Exception: " + e);
             }
@@ -317,8 +389,8 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             System.out.println("NullPointerException: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Person data not properly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            System.out.println("Unexpected error raro: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "An unexpected error occurred, Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -366,7 +438,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             foreFathersNeeded = true;
 
             // Display the graph using the existing method
-            updateGraphDisplay(personName.trim(), foreFathersNeeded, null);
+            updateGraphDisplay(personName.trim(), foreFathersNeeded, null, null);
 
             JOptionPane.showMessageDialog(this,
                     "Click a node in the graph to view its details.",

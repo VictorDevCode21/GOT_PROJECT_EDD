@@ -9,6 +9,7 @@ package edu.unimet.edd.tree;
 public class GenericLinkedList<T> {
     private GenericNode<T> first;  // Head node of the list
     private GenericNode<T> last;  // Tail node of the list (used for efficient enqueue operations)
+    private int size; // To track the size of the list
 
     /**
      * Constructor to create an empty linked list.
@@ -16,6 +17,7 @@ public class GenericLinkedList<T> {
     public GenericLinkedList() {
         this.first = null;
         this.last = null;
+        this.size = 0;
     }
 
     /**
@@ -32,6 +34,7 @@ public class GenericLinkedList<T> {
             getLast().setNext(newGenericNode);  // Attach the new node at the end
             setLast(newGenericNode);         // Update the last to the new node
         }
+        setSize(getSize() + 1);
     }
 
     /**
@@ -45,6 +48,7 @@ public class GenericLinkedList<T> {
         }
         T data = getFirst().getData();  // Get the data from the first
         setFirst(getFirst().getNext());    // Move the first to the next node
+        setSize(getSize() - 1); // Decrement size when a node is removed
         if (getFirst() == null) {
             setLast(null);  // If the list is now empty, reset the last to null
         }
@@ -97,5 +101,19 @@ public class GenericLinkedList<T> {
      */
     public void setLast(GenericNode<T> last) {
         this.last = last;
+    }
+
+    /**
+     * @return the size
+     */
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * @param size the size to set
+     */
+    public void setSize(int size) {
+        this.size = size;
     }
 }

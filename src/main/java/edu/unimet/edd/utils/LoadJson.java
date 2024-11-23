@@ -94,7 +94,7 @@ public class LoadJson {
                             String fatherNormalizedName = normalizeName(name);
 
                             // Create a new Person object for the child with minimal details
-                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName,null, null, null, null, null, null, null, null);
+                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName,null, null, null, null, null, null, null, null, null);
                             // Set the parent as the father of the child
                             child.setFather(name.toLowerCase());
 //                            System.out.println("En LoadJson se guarda asi: " + name.toLowerCase());
@@ -136,7 +136,7 @@ public class LoadJson {
         };
 
 //        System.out.println("Person: " + fullName + " Father: " + father);
-        return new Person(fullName, title, nickname, father, mother, fate, ofHisName, eyesColor, hairColor, notes, wedTo, children);
+        return new Person(fullName, title, nickname, father, mother, fate, ofHisName, eyesColor, hairColor, notes, wedTo, null, children);
     }
 
     /**
