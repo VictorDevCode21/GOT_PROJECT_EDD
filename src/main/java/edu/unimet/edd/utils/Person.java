@@ -216,4 +216,63 @@ public class Person {
         }
     }
 
+    /**
+     * Extracts the first name from a full name string.
+     *
+     * @param fullName The full name string.
+     * @return The first name extracted from the full name.
+     */
+    private String getFirstName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            return "";
+        }
+        String[] parts = fullName.split("\\s+");
+        return parts[0]; // Returns the first part of the name
+    }
+
+    /**
+     * Checks if a child is already present in the parent's list of children.
+     *
+     * @param parent The parent Person object.
+     * @param childName The name of the child to check.
+     * @return True if the child is a duplicate, false otherwise.
+     */
+    public boolean checkDuplicateChild(Person parent, String childName) {
+        if (parent == null) {
+//            System.out.println("Parent is null. Cannot check for duplicate children.");
+            return false; // No parent means no duplicates
+        }
+
+        LinkedList currentChildren = parent.getChildren();
+        if (currentChildren == null) {
+//            System.out.println("Parent " + parent.getName() + " has no children list. Cannot check for duplicates.");
+            return false; // No children list means no duplicates
+        }
+
+        String newChildFirstName = getFirstName(childName);
+
+//        System.out.println("Checking for duplicate child...");
+//        System.out.println("Parent: " + parent.getName());
+//        System.out.println("Attempting to add child: " + childName + " (" + newChildFirstName + ")");
+//        System.out.println("Current children of " + parent.getName() + ":");
+
+        // Print the current list of children
+        for (int i = 0; i < currentChildren.size(); i++) {
+//            System.out.println("- " + currentChildren.get(i));
+        }
+
+        // Check for duplicates
+        for (int i = 0; i < currentChildren.size(); i++) {
+            String existingChildFirstName = getFirstName(currentChildren.get(i));
+//            System.out.println("Comparing with existing child: " + currentChildren.get(i) + " (" + existingChildFirstName + ")");
+            if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
+//                System.out.println("Duplicate detected: " + newChildFirstName + " already exists as a child of " + parent.getName());
+                return true; // A duplicate is found
+            }
+        }
+
+//        System.out.println("No duplicate found: " + newChildFirstName + " can be added as a child of " + parent.getName());
+        return false; // No duplicates found
+    }
+
 }
