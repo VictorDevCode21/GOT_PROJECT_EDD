@@ -447,11 +447,6 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 
             }
 
-            
-            
-            
-            
-            
             // Search for the person in the HashTable
             Person person = table.get(personName.trim());
             if (person == null) {
