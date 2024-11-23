@@ -330,23 +330,4 @@ public class Tree {
             }
         }
     }
-    
-/**
- * Searches for a person in the genealogy tree based on the provided name.
- *
- * @param NameSearched The name of the person to search for.
- *                     
- * @return The Person object corresponding to the provided name,
- *         or  null if the person is not found in the table.
- */
-public Person SearchTest(String NameSearched) {
-    // Normalize the input name to ensure consistent comparison.
-    String normalizedFullName = normalizeName(NameSearched);
-
-    // Retrieve the person object from the hash table using the normalized name.
-    return table.get(normalizedFullName);
-}
-    
-    
-    
 }
