@@ -81,6 +81,12 @@ public class LoadJson {
                         mother = (String) value;
                     }
                     break;
+                case "Fate":
+                    fate = (String) value;
+                    break;
+                case "Of his name":
+                    ofHisName = (String) value;
+                    break;
                 case "Father to":
                     if (value instanceof JSONArray) {
                         JSONArray childrenArray = (JSONArray) value;
@@ -94,20 +100,14 @@ public class LoadJson {
                             String fatherNormalizedName = normalizeName(name);
 
                             // Create a new Person object for the child with minimal details
-                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName,null, null, null, null, null, null, null, null, null);
+                            Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName, null, null, null, null, null, null, null, null, null);
                             // Set the parent as the father of the child
-                            child.setFather(name.toLowerCase());
+                            child.setFather(normalizeName(getFullName(name, ofHisName)));
 //                            System.out.println("En LoadJson se guarda asi: " + name.toLowerCase());
 //                                 Add the child to the tree
                             tree.addPerson(child);
                         }
                     }
-                    break;
-                case "Fate":
-                    fate = (String) value;
-                    break;
-                case "Of his name":
-                    ofHisName = (String) value;
                     break;
                 case "Of eyes":
                     eyesColor = (String) value;
@@ -176,7 +176,6 @@ public class LoadJson {
      * @param childName The name of the child to check for duplicates.
      * @return True if the child is already present, false otherwise.
      */
-    
 //    private boolean isChildPresent(Person parent, String childName) {
 //        if (parent == null || childName == null || childName.trim().isEmpty()) {
 //            return false; // Invalid input
