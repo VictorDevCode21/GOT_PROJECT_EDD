@@ -423,11 +423,35 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     JOptionPane.QUESTION_MESSAGE
             );
 
-            if (personName == null || personName.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Name cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+//            if (personName == null || personName.trim().isEmpty()) {
+//                JOptionPane.showMessageDialog(this, "Name cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+//                return;
+//            }
+
+            // Handle the case where the user closed the input dialog or clicked "Cancel"
+            if (personName == null) {
+                JOptionPane.showMessageDialog(this, "Operation cancelled. No name entered.", "Info", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
+            
+            // Check if the name is empty or contains only spaces
+            if (personName.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Name cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+                return; 
+            }
+            
+            // Check if the name contains only valid characters (alphabet and spaces)
+            if (!personName.matches("[a-zA-Z ]+")) {
+                JOptionPane.showMessageDialog(this, "Invalid name format. Only alphabets and spaces are allowed.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+                
+            }
 
+            
+            
+            
+            
+            
             // Search for the person in the HashTable
             Person person = table.get(personName.trim());
             if (person == null) {
