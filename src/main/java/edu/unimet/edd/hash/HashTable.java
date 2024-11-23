@@ -1,6 +1,7 @@
 package edu.unimet.edd.hash;
 
 import edu.unimet.edd.listeners.HashTableListener;
+import edu.unimet.edd.tree.GenericSet;
 import edu.unimet.edd.utils.Person;
 import edu.unimet.edd.tree.Tree;
 import edu.unimet.edd.utils.LinkedListListeners;
@@ -97,6 +98,99 @@ public class HashTable {
      */
     private void notifyListeners() {
         listeners.notifyListeners();
+    }
+
+    /**
+     * Removes duplicate entries from the HashTable. If two or more persons have
+     * the same name, only the first one found will remain in the table, and the
+     * others will be removed.
+     */
+    public void removeDuplicates() {
+        Person[] allPeople = getAllPeople();
+        GenericSet<String> seenNames = new GenericSet<>();
+
+        for (Person person : allPeople) {
+            if (person == null || person.getName() == null) {
+                continue; // Ignorar personas nulas
+            }
+
+            if (seenNames.contains(person.getName())) {
+                boolean removed = remove(person.getName());
+                if (removed) {
+                    System.out.println("Removed duplicate: " + person.getName());
+                }
+            } else {
+                seenNames.add(person.getName());
+            }
+        }
+    }
+
+    /**
+     * Method to update the father's name in each person’s setFather attribute.
+     * This method will use the father's name and construct the full name to
+     * update the `setFather` of the child.
+     */
+//    public void updateFatherNames() {
+        // Get all people stored in the hash table
+//        Person[] allPeople = getAllPeople();
+//
+//        // Iterate over each person
+//        for (Person person : allPeople) {
+//            if (person != null && person.getFather() != null) {
+//                // Get the father's name from the person
+//                String fatherName = person.getFather();
+//
+//                // Fetch the father object from the hash table using the father's name
+//                Person father = get(normalizeName(fatherName));
+//                
+//                if (father == null) {
+//                    System.out.println("El padre de: " + person.getName() + " Es null");
+//                }
+//
+//                // If the father exists in the table
+//                if (father != null) {
+//                    // Construct the full name of the father
+//                    String fatherFullName = getFullName(father.getName(), father.getOfHisName());
+//
+//                    // Update the child's setFather with the full name of the father
+//                    person.setFather(fatherFullName);
+//
+//                    // Put the updated person back into the hash table
+//                    put(person.getName(), person);
+//                }
+//            }
+//        }
+//    }
+
+    
+    /**
+     * Normalizes a name by standardizing the format for comparison. This method
+     * handles names with commas and other special characters.
+     *
+     * @param name The name to normalize.
+     * @return The normalized name.
+     */
+    private String normalizeName(String name) {
+        if (name == null) {
+            return null;
+        }
+        // Remove commas and extra spaces, then convert to lowercase for consistent comparison
+        return name.trim().replace(",", "").toLowerCase();
+    }
+    
+    /**
+     * Constructs the full name of a person by combining their name and "Of his
+     * name" value.
+     *
+     * @param name The base name of the person.
+     * @param ofHisName The value of "Of his name" (e.g., "First").
+     * @return The full name in the format "name, [Of his name] of his name".
+     */
+    private String getFullName(String name, String ofHisName) {
+        if (ofHisName == null || ofHisName.isEmpty()) {
+            return name; // If "Of his name" is not provided, return the base name
+        }
+        return name + ", " + ofHisName + " of his name";
     }
 
     /**
@@ -205,27 +299,40 @@ public class HashTable {
      * @return An array of Person objects stored in the table.
      */
     public Person[] getAllPeople() {
-        // Calcular el tamaño total necesario
+        // Calculate the total number of people
         int totalPeople = 0;
         for (LinkedList bucket : table) {
             if (bucket != null) {
-                totalPeople += bucket.getSize(); // Contar elementos en cada bucket
+                totalPeople += bucket.getSize(); // Count elements in each bucket
             }
         }
 
-        // Crear un arreglo estático del tamaño necesario
+        // Create an array of the required size
         Person[] peopleArray = new Person[totalPeople];
 
-        // Llenar el arreglo con las personas de la tabla hash
+        // Populate the array with people from the hash table
         int index = 0;
         for (LinkedList bucket : table) {
             if (bucket != null) {
                 Node current = bucket.getFirstNode();
                 while (current != null) {
-                    peopleArray[index++] = current.getValue().getValue(); // Agregar Persona al arreglo
+                    // Validate nodes and values before adding to the array
+                    if (current.getValue() != null && current.getValue().getValue() != null) {
+                        peopleArray[index++] = current.getValue().getValue();
+                    } else {
+                        System.out.println("Skipping null or invalid node in bucket");
+                    }
                     current = current.getNext();
                 }
             }
+        }
+
+        // If there were invalid entries, the array might not be fully filled
+        if (index < totalPeople) {
+            System.out.println("Resizing array due to skipped invalid entries");
+            Person[] validPeople = new Person[index];
+            System.arraycopy(peopleArray, 0, validPeople, 0, index);
+            return validPeople;
         }
 
         return peopleArray;
@@ -293,6 +400,7 @@ public class HashTable {
                 Person removedValue = current.getValue().getValue();
                 bucket.remove(current.getValue().getKey()); // Remove node with the key
                 size--;
+                notifyListeners(); // Notify listeners after the update
 
                 return true;
             }
