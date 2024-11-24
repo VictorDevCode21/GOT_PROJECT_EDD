@@ -239,13 +239,12 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             // Create the graph based on the current tree data
             Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded, titleName, generationNumber);
 
-//        System.out.println("Table size in GenealogyGUI: " + table.size());
             // If a viewer already exists, close its previous view to avoid conflicts
             if (viewer != null) {
                 try {
                     viewer.close();  // Ensure previous viewer is closed properly
                 } catch (Exception e) {
-//                System.out.println("Error closing the viewer: " + e.getMessage());
+
                 }
             }
 
@@ -279,7 +278,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     }
                 });
             } else {
-                System.out.println("Error: view is null, unable to add mouse listener.");
+
             }
 
             // Remove the old graph view and add the new one
@@ -288,10 +287,9 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             graphPanel.revalidate();
             graphPanel.repaint();
 //        } catch (NullPointerException e) {
-//            System.out.println("Null Pointer Error: " + e.getMessage());
 //            JOptionPane.showMessageDialog(this, "Unable to retrieve graph data. Please ensure the data is correctly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected Error: " + e.getMessage());
+
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -429,24 +427,22 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     titleHolders.addPerson(person);
                     System.out.println("Person with title: " + person.getName() + " " + person.getTitle() + " added succesfully");
                 } else {
-//                System.out.println("Person: " + person.getName() + " Person Title: " + person.getTitle() + " Introduced Title: " + titleName);
+
                 }
             }
 
             try {
                 updateGraphDisplay(null, false, titleHolders, null);
             } catch (Exception e) {
-                System.out.println("Exception: " + e);
+                
             }
 
             JOptionPane.showMessageDialog(this,
                     "Click a node in the graph to view its details.",
                     "Info", JOptionPane.INFORMATION_MESSAGE);
         } catch (NullPointerException e) {
-            System.out.println("NullPointerException: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Person data not properly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected error raro: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred, Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -520,10 +516,8 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     "Click a node in the graph to view its details.",
                     "Info", JOptionPane.INFORMATION_MESSAGE);
         } catch (NullPointerException e) {
-            System.out.println("NullPointerException: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Person data not found. Please ensure the person exists in the genealogy.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -556,7 +550,6 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             // Retrieve node coordinates in graph units (GU)
             Object xyzObject = node.getAttribute("xyz");
             if (xyzObject == null) {
-//                            System.out.println("Node " + node.getId() + " position is null. Skipping.");
                 continue;
             }
 
@@ -569,15 +562,12 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             double pixelX = pixels.x;
             double pixelY = pixels.y;
 
-//                        System.out.printf("Node %s: Graph position (%.3f, %.3f) --> Pixel position (%.0f, %.0f)%n",
 //                                node.getId(), nodeX, nodeY, pixelX, pixelY);
             // Calculate the distance between the click and the node in pixel space
             double distance = Math.sqrt(Math.pow(e.getX() - pixelX, 2) + Math.pow(e.getY() - pixelY, 2));
-//                        System.out.println("Distance from click to node " + node.getId() + ": " + distance);
 
             // If the distance is within the threshold, change the node's color
             if (distance < threshold) {
-//                            System.out.println("Node " + node.getId() + " clicked. Changing color to green.");
                 node.setAttribute("ui.style", "fill-color: green;");
                 Person person = table.get(node.getId());
                 String details = person.getDetailsByName(person.getName());
@@ -589,7 +579,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         }
 
         if (!nodeFound) {
-            System.out.println("No node found close to the click position.");
+
         }
     }
 

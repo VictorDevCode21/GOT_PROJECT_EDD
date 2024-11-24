@@ -301,13 +301,11 @@ public class InterfaceGOT extends javax.swing.JFrame {
 //        }
 //        
 //        genealogyGUI.loadTreeLoaded(); 
-//                System.out.println("boton del arbol 1");
 //
 //        if (!genealogyGUI.isVisible()) {
 //            genealogyGUI.setVisible(true);  // Asegúrate de que solo se abra si no está visible
 //        } else {
 //            genealogyGUI.requestFocus();  // Si ya está abierta, tráela al frente
-//            System.out.println("boton del arbol 1");
 //        }
             
            

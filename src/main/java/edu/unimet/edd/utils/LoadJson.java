@@ -35,8 +35,6 @@ public class LoadJson {
 //                personName = normalizeName(personName);  // Normalizing the person's name
                 // Parse and add the person to the tree
                 Person person = parsePersonDetails(personName, personDetails, tree);
-//                System.out.println("Adding person: " + person.getName());
-//                System.out.println("Adding person: " + personName);
                 tree.addPerson(person);
             }
         }
@@ -97,7 +95,6 @@ public class LoadJson {
                             Person child = new Person(normalizedChildrenName, null, null, fatherNormalizedName,null, null, null, null, null, null, null, null, null);
                             // Set the parent as the father of the child
                             child.setFather(name.toLowerCase());
-//                            System.out.println("En LoadJson se guarda asi: " + name.toLowerCase());
 //                                 Add the child to the tree
                             tree.addPerson(child);
                         }
@@ -135,7 +132,6 @@ public class LoadJson {
             nickname = normalizeName(nickname);
         };
 
-//        System.out.println("Person: " + fullName + " Father: " + father);
         return new Person(fullName, title, nickname, father, mother, fate, ofHisName, eyesColor, hairColor, notes, wedTo, null, children);
     }
 

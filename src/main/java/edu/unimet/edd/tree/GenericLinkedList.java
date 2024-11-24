@@ -70,7 +70,6 @@ public class GenericLinkedList<T> {
     public void printList() {
         GenericNode<T> current = getFirst();
         while (current != null) {
-            System.out.println(current.getData());
             current = current.getNext();
         }
     }

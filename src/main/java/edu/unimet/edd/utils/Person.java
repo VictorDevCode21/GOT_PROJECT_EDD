@@ -189,17 +189,13 @@ public class Person {
         }
 
         String newChildFirstName = getFirstName(childName);
-//        System.out.println("Trying to add: " + childName);
 
         PersonLinkedList currentChildren = parent.getChildren();
-//        System.out.println("Showing father: " + parent.getName());
         if (currentChildren == null) {
             return null; // No children list means no duplicates
         }
 
-//        System.out.println("Showing children: ");
         for (int i = 0; i < currentChildren.size(); i++) {
-//            System.out.println("lista de hijos: " + currentChildren.get(i));
         }
 
         // Check for duplicates
@@ -209,7 +205,6 @@ public class Person {
 
             // If duplicate is found, remove the existing child from both the list and HashTable
             if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
-//                System.out.println("Removed duplicate: " + currentChild.toLowerCase() + " his father is: " +  parent.getName());
                 return currentChild.toLowerCase(); // A duplicate was found and removed from both the list and HashTable
             }
         }

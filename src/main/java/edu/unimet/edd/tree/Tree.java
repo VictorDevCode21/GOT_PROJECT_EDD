@@ -103,12 +103,10 @@ public class Tree implements HashTableListener {
      * empty.
      */
     public Integer BFS(Consumer<TreeNode> processNode) {
-        System.out.println(countTreeNodes());
         GenericLinkedList<TreeNode> queue = new GenericLinkedList<>();
         TreeNode root = getRoot();
 
         if (root == null) {
-            System.out.println("Tree is empty.");
             return -1;
         }
 
@@ -158,7 +156,6 @@ public class Tree implements HashTableListener {
 
         // Check if the tree is empty
         if (root == null) {
-            System.out.println("Tree is empty.");
             return count; // Return 0 if the tree is empty
         }
 
@@ -197,7 +194,6 @@ public class Tree implements HashTableListener {
         if ((fullNameKey != null && table.get(fullNameKey) != null)
                 || (nicknameKey != null && table.get(nicknameKey) != null)) {
             // If the person exists, do not add duplicates
-//            System.out.println("Duplicate found, not adding: " + person.getName());
             return;
         }
 
@@ -233,14 +229,11 @@ public class Tree implements HashTableListener {
 
                 if (duplicatedChildName != null) {
 //                    if (table.get(duplicatedChildName) == null)
-//                        System.out.println("No coincidences for the child");
                     Boolean deleted = table.remove(duplicatedChildName);
                     if (deleted == true) {
-//                        System.out.println("Child eliminated: " + duplicatedChildName + " father: " + father.getName());
                     }
 
                 } else {
-//                System.out.println("Father " + fatherName + " not found in the HashTable.");
                 }
             }
 
@@ -375,7 +368,6 @@ public class Tree implements HashTableListener {
             Person newPerson = table.get(personName);
 
             if (newPerson == null) {
-                System.out.println("Person not found in the HashTable: " + personName);
                 continue; // Skip if person is not found
             }
 
@@ -412,7 +404,6 @@ public class Tree implements HashTableListener {
         Person currentPerson = table.get(personName);
 
         if (currentPerson == null) {
-            System.out.println("Person not found in the HashTable: " + personName);
             return;
         }
 
@@ -512,16 +503,13 @@ public class Tree implements HashTableListener {
                 // Add the node if it does not exist
                 if (graph.getNode(personName) == null) {
                     graph.addNode(personName).setAttribute("ui.label", person.getName());
-//                System.out.println("Added person to graph: " + person.getName());
                 }
             }
         }
 
         // Print the nicknames of all people in the HashTable (if not null)
-//        System.out.println("Nicknames of people in the HashTable:");
         for (Person person : table.getAllPeople()) {
             if (person.getNickname() != null) {
-//                System.out.println(" - " + person.getNickname());
             }
         }
 
@@ -546,9 +534,7 @@ public class Tree implements HashTableListener {
                 }
 
                 // Print all nodes currently in the graph
-//                System.out.println("Current nodes in the graph:");
                 for (Node node : graph) {
-//                    System.out.println(" - " + node.getId());
                 }
 
                 // If still not found, try to match by first and last name
@@ -566,13 +552,9 @@ public class Tree implements HashTableListener {
                     String edgeId = fatherNode.getId() + "-" + childName;
                     if (graph.getEdge(edgeId) == null) {
                         graph.addEdge(edgeId, fatherNode.getId(), childName, true);
-//                        System.out.println("Added edge: " + person.getFather() + " -> " + person.getName());
                     }
                 } else {
-                    System.out.println("Skipped adding edge for father: " + person.getFather()
-                            + " for person " + person.getName()
-                            + " (Father node: " + (fatherNode != null ? "Exists" : "Does not exist")
-                            + ", Child node: " + (graph.getNode(childName) != null ? "Exists" : "Does not exist") + ")");
+
                 }
             }
         }
@@ -608,11 +590,9 @@ public class Tree implements HashTableListener {
                     if (childFromTable != null) {
                         childFromTable.setFather(person.getName()); // Set the current person as the child's father.
                         table.put(childName, person);
-//                        System.out.println("Set father: " + person.getName() + " for child: " + childName);
 
                     } else {
                         // If the child is not found in the table, log a message.
-//                        System.out.println("Child not found in table: " + childName);
                     }
                 }
             }
