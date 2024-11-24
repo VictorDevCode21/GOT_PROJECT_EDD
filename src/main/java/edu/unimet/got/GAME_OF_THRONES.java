@@ -1,6 +1,7 @@
 package edu.unimet.got;
 
 import edu.unimet.edd.interfaces.GenealogyGUI;
+import edu.unimet.edd.interfaces.InterfaceGOT;
 
 /**
  *
@@ -10,7 +11,7 @@ public class GAME_OF_THRONES {
 
     public static void main(String[] args) {
 
-        GenealogyGUI gui = new GenealogyGUI();
+        InterfaceGOT gui = new InterfaceGOT(); //GenealogyGUI      //InterfaceGOT
         gui.show();
     }
 }

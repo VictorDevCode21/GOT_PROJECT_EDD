@@ -319,11 +319,4 @@ public class HashTable {
         }
         return false; // Key not found
     }
-
-//    public void printTableContents() {
-//        System.out.println("HashTable contents:");
-//        for (Person person : table.getAllPeople()) {
-//            System.out.println("- " + person.getName());
-//        }
-//    }
 }

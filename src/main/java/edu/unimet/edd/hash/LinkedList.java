@@ -146,9 +146,7 @@ public class LinkedList {
     public void print() {
         Node current = first;
         while (current != null) {
-            System.out.print(current.getValue().getKey() + " -> ");
             current = current.getNext();
         }
-        System.out.println("null");
     }
 }

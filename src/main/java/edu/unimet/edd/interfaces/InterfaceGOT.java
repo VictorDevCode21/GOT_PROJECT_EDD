@@ -7,6 +7,7 @@ package edu.unimet.edd.interfaces;
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 
+import edu.unimet.edd.tree.Tree;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.JPanel;
@@ -16,6 +17,11 @@ import javax.swing.JPanel;
  * @author Chantal
  */
 public class InterfaceGOT extends javax.swing.JFrame {
+    
+    private GenealogyGUI genealogyGUI;
+    private boolean isGraphShown = false;
+    private Tree tree;
+    
 
     /**
      * Creates new form InterfazGOT
@@ -25,19 +31,8 @@ public class InterfaceGOT extends javax.swing.JFrame {
     
     public InterfaceGOT() {
         initComponents();
-        Page0 p0 = new Page0();
             }
-    
-    private void ShowPanel(JPanel p) {
-        p.setSize(520, 390);
-        p.setLocation(0, 0);
 
-        content.removeAll();
-        content.setLayout(new BorderLayout());
-        content.add(p, BorderLayout.CENTER);
-        content.revalidate();
-        content.repaint();
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -60,7 +55,11 @@ public class InterfaceGOT extends javax.swing.JFrame {
         xBar = new javax.swing.JPanel();
         xBackground = new javax.swing.JPanel();
         Exit = new javax.swing.JLabel();
-        content = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea3 = new javax.swing.JTextArea();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocationByPlatform(true);
@@ -213,30 +212,52 @@ public class InterfaceGOT extends javax.swing.JFrame {
 
         Background.add(xBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 760, 40));
 
-        content.setBackground(new java.awt.Color(255, 255, 255));
+        jScrollPane3.setBackground(new java.awt.Color(255, 255, 255));
+        jScrollPane3.setBorder(null);
+        jScrollPane3.setForeground(new java.awt.Color(51, 51, 51));
 
-        javax.swing.GroupLayout contentLayout = new javax.swing.GroupLayout(content);
-        content.setLayout(contentLayout);
-        contentLayout.setHorizontalGroup(
-            contentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 520, Short.MAX_VALUE)
-        );
-        contentLayout.setVerticalGroup(
-            contentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 390, Short.MAX_VALUE)
-        );
+        jTextArea3.setBackground(new java.awt.Color(255, 255, 255));
+        jTextArea3.setColumns(20);
+        jTextArea3.setFont(new java.awt.Font("MV Boli", 3, 18)); // NOI18N
+        jTextArea3.setForeground(new java.awt.Color(51, 51, 51));
+        jTextArea3.setRows(5);
+        jTextArea3.setText("Hand of the King, we have achieved\ntranscribe the language you want\nin a readable format, so you can\nbe able to see the family trees of\nevery lineage you want. Please upload \nthe JSON and choose your options.");
+        jScrollPane3.setViewportView(jTextArea3);
 
-        Background.add(content, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 50, 520, 390));
+        Background.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 150, 370, 220));
+
+        jLabel1.setFont(new java.awt.Font("MV Boli", 3, 36)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(51, 51, 51));
+        jLabel1.setText("WELCOME");
+        Background.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 70, 240, -1));
+
+        jTextArea1.setBackground(new java.awt.Color(255, 255, 255));
+        jTextArea1.setColumns(20);
+        jTextArea1.setFont(new java.awt.Font("MV Boli", 3, 18)); // NOI18N
+        jTextArea1.setForeground(new java.awt.Color(51, 51, 51));
+        jTextArea1.setRows(5);
+        jTextArea1.setText("Hand of the King, we have achieved\ntranscribe the language you want\nin a readable format, so you can\nbe able to see the family trees of\nevery lineage you want. Please upload \nthe JSON and choose your options");
+        jScrollPane1.setViewportView(jTextArea1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(Background, javax.swing.GroupLayout.PREFERRED_SIZE, 760, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(Background, javax.swing.GroupLayout.PREFERRED_SIZE, 530, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
         );
 
         pack();
@@ -269,44 +290,40 @@ public class InterfaceGOT extends javax.swing.JFrame {
     }//GEN-LAST:event_ExitMouseExited
 
     private void RecordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RecordActionPerformed
-        Page1 p1 = new Page1();
-            ShowPanel(p1);
-           // genealogyGUI.onRegister();
+
+        genealogyGUI.onRegister();
     }//GEN-LAST:event_RecordActionPerformed
 
     private void searchNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchNameActionPerformed
-        Page2 p2 = new Page2();
-            ShowPanel(p2);
+
     }//GEN-LAST:event_searchNameActionPerformed
 
     private void showAncestorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAncestorsActionPerformed
 
-        Page3 p3 = new Page3();
-            ShowPanel(p3);
+        genealogyGUI.onShowForefathers();
     }//GEN-LAST:event_showAncestorsActionPerformed
 
     private void searchTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTitleActionPerformed
-        Page4 p4 = new Page4();
-            ShowPanel(p4);
+        
+        genealogyGUI.onshowTitleHolders();
     }//GEN-LAST:event_searchTitleActionPerformed
 
     private void membersGenerationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_membersGenerationActionPerformed
-        Page5 p5 = new Page5();
-            ShowPanel(p5);
+        genealogyGUI.onshowGenerationMembers();
     }//GEN-LAST:event_membersGenerationActionPerformed
 
     private void loadTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadTreeActionPerformed
-//        if (genealogyGUI == null) {  // Solo crea la instancia una vez
-//        genealogyGUI = new GenealogyGUI();
-//        }
-//        
-//        genealogyGUI.loadTreeLoaded(); 
-//
-//        if (!genealogyGUI.isVisible()) {
-//            genealogyGUI.setVisible(true);  // Asegúrate de que solo se abra si no está visible
-//        } else {
-//            genealogyGUI.requestFocus();  // Si ya está abierta, tráela al frente
-//        }
+        if (genealogyGUI == null) {  // Solo crea la instancia una vez
+        genealogyGUI = new GenealogyGUI();
+        }
+        
+        genealogyGUI.loadTreeLoaded(); 
+
+        if (!genealogyGUI.isVisible()) {
+            genealogyGUI.setVisible(true);  // Asegúrate de que solo se abra si no está visible
+        } else {
+            genealogyGUI.requestFocus();  // Si ya está abierta, tráela al frente
+        }
             
            
 
@@ -414,7 +431,11 @@ public class InterfaceGOT extends javax.swing.JFrame {
     private javax.swing.JPanel Menu;
     private javax.swing.JButton Record;
     private javax.swing.JSeparator Separator;
-    private javax.swing.JPanel content;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea jTextArea3;
     private javax.swing.JButton loadTree;
     private javax.swing.JButton membersGeneration;
     private javax.swing.JButton searchName;

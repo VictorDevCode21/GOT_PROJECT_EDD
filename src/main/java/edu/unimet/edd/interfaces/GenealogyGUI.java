@@ -2,8 +2,8 @@ package edu.unimet.edd.interfaces;
 
 import edu.unimet.edd.hash.HashTable;
 import edu.unimet.edd.listeners.HashTableListener;
-import edu.unimet.edd.tree.GenericLinkedList;
-import edu.unimet.edd.tree.GenericNode;
+import edu.unimet.edd.listeners.RegisterListener;
+import edu.unimet.edd.listeners.TreeLoadListener;
 import edu.unimet.edd.tree.Tree;
 import edu.unimet.edd.tree.TreeNode;
 import edu.unimet.edd.utils.LoadJson;
@@ -12,20 +12,16 @@ import edu.unimet.edd.utils.PersonLinkedList;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swing_viewer.SwingViewer;  // Use SwingViewer instead of Viewer
 import org.graphstream.ui.view.Viewer;
-import org.graphstream.algorithm.Toolkit;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.commons.math3.util.Pair;
 import org.graphstream.graph.Node;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.ui.geom.Point3;
-import org.graphstream.ui.swing_viewer.DefaultView;
 
 /**
  * GenealogyGUI is the main graphical interface for visualizing and interacting
@@ -81,6 +77,20 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
      * Flag indicating if forefathers are to be displayed in the graph.
      */
     private boolean foreFathersNeeded = false;
+    
+    /**
+    * Listener responsible for handling events related to loading a tree.
+    * This listener is used to respond to specific actions or updates
+    * when the tree structure is loaded.
+    */
+    private TreeLoadListener listener;
+    
+    /**
+     * Listener responsible for handling events related to user registration or data registration.
+     * This listener is triggered when a new registration action occurs or when the registration
+     * state needs to be updated.
+     */
+    private RegisterListener RegisterListener;
 
     /**
      * Constructs the GenealogyGUI interface. Initializes the components, sets
@@ -103,61 +113,156 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         graphPanel = new JPanel(new BorderLayout());
         add(graphPanel, BorderLayout.CENTER);
 
-        // Set up the UI components (buttons, etc.)
-        JPanel controlsPanel = new JPanel();
-        JButton loadButton = new JButton("Load Tree");
-        loadButton.addActionListener(e -> loadTree());  // Action listener for the button
-        controlsPanel.add(loadButton);
+//        // Set up the UI components (buttons, etc.)
+//        JPanel controlsPanel = new JPanel();
+//        JButton loadButton = new JButton("Load Tree");
+//        loadButton.addActionListener(e -> loadTree());  // Action listener for the button
+//        controlsPanel.add(loadButton);
+//
+//        add(controlsPanel, BorderLayout.SOUTH);
+//
+//        // Add a "See Register" button
+//        JButton seeRegisterButton = new JButton("See Register");
+//        seeRegisterButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                updateGraphDisplay(null, false, null, null);
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//                return;
+//            }
+//
+//            JOptionPane.showMessageDialog(this,
+//                    "Click a node in the graph to view its details.",
+//                    "Info", JOptionPane.INFORMATION_MESSAGE);
+//        });
+//        controlsPanel.add(seeRegisterButton);
+//
+//        JButton showForefathersButton = new JButton("Show Forefathers");
+//        showForefathersButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showForefathers();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showForefathersButton);
+//
+//        // Button to execute event for showing title holders
+//        JButton showTitleHoldersButton = new JButton("Show title holders");
+//        showTitleHoldersButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showTitleHolders();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showTitleHoldersButton);
+//
+//        // Button to execute event for showing title holders
+//        JButton showGenerationButton = new JButton("Show Generation");
+//        showGenerationButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showGenerationMembers();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showGenerationButton);
 
-        add(controlsPanel, BorderLayout.SOUTH);
-
-        // Add a "See Register" button
-        JButton seeRegisterButton = new JButton("See Register");
-        seeRegisterButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                updateGraphDisplay(null, false, null, null);
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-                return;
-            }
-
-            JOptionPane.showMessageDialog(this,
-                    "Click a node in the graph to view its details.",
-                    "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        controlsPanel.add(seeRegisterButton);
-
-        JButton showForefathersButton = new JButton("Show Forefathers");
-        showForefathersButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showForefathers();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showForefathersButton);
-
-        // Button to execute event for showing title holders
-        JButton showTitleHoldersButton = new JButton("Show title holders");
-        showTitleHoldersButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showTitleHolders();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showTitleHoldersButton);
-
-        // Button to execute event for showing title holders
-        JButton showGenerationButton = new JButton("Show Generation");
-        showGenerationButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showGenerationMembers();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showGenerationButton);
+    }
+    
+    
+    /**
+    * Handles the action of displaying the forefathers of a selected individual.
+    * <p>
+    * This method triggers the {@code showForefathers()} method, which contains the logic 
+    * to retrieve and display the ancestors (forefathers) of the selected node in the tree.
+    * </p>
+    */    
+    public void onShowForefathers() {
+        // Aquí va tu lógica para mostrar los antepasados
+        showForefathers();
+    }
+    
+    public void setRegisterListener(RegisterListener listener) {
+    this.RegisterListener = listener;
+    }
+    /**
+    * Handles the registration process and updates the graph display.
+    * <p>
+    * This method checks if a JSON file is loaded before proceeding. If the JSON file is loaded,
+    * it updates the graph display. If not, it displays a message prompting the user to load a JSON file first.
+    * After updating the graph, it informs the user that they can interact with the nodes to view details.
+    * </p>
+    */
+    public void onRegister() {
+        // Verificar si el archivo JSON está cargado
+        if (jsonLoaded) {
+            updateGraphDisplay(null, false, null, null);
+       } else {
+           JOptionPane.showMessageDialog(null, "You need to Load a JSON file first");
+           return;
+       }
+       JOptionPane.showMessageDialog(null,
+          "Click a node in the graph to view its details.",
+          "Info", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /**
+     * Handles the action of displaying title holders.
+     * <p>
+     * This method acts as a trigger to invoke the {@code showTitleHolders()} method,
+     * which contains the logic to retrieve and display individuals associated with specific titles.
+     * It may also include additional functionality, such as updating the graph display, 
+     * which is currently commented out.
+     * </p>
+     */
+    public void onshowTitleHolders() {
+        showTitleHolders();
+        //updateGraphDisplay(null, false, PersonLinkedList, null);  
+    }
+    
+    /**
+     * Handles the action of displaying generation members.
+     * <p>
+     * This method serves as an entry point to invoke the {@code showGenerationMembers()} method,
+     * which performs the logic for retrieving and displaying information about the members 
+     * of specific generations in the tree.
+     * </p>
+     */
+    public void onshowGenerationMembers() {
+        showGenerationMembers();
+    }
+    
+    /**
+     * Loads the tree structure and notifies the registered {@link TreeLoadListener}.
+     * <p>
+     * This method first performs the logic to load the tree using the {@code loadTree()} method.
+     * Once the tree is successfully loaded, it triggers the {@code onTreeLoaded()} method
+     * of the registered listener, if any.
+     * </p>
+     */
+    public void loadTreeLoaded() {
+        // Aquí iría la lógica para cargar el árbol
+        loadTree();
+        // Una vez que el árbol ha sido cargado, notificamos a todos los listeners registrados
+        if (listener != null) {
+            listener.onTreeLoaded();  // Llamamos al método onTreeLoaded() del listener
+        }
+    }
+    
+    /**
+     * Registers a listener to handle events related to tree loading.
+     * 
+     * @param listener the {@link TreeLoadListener} to be registered. This listener 
+     *                 will handle actions or updates triggered during the tree loading process.
+     */
+    public void setTreeLoadListener(TreeLoadListener listener) {
+        this.listener = listener;  // Guarda la referencia del listener
+    }
+    
+    public void onPersonSearch(String name) {
+        
 
     }
 
@@ -417,6 +522,12 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 JOptionPane.showMessageDialog(this, "Title cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            
+            // Validar que el título contenga solo letras
+            if (!titleName.matches("[a-zA-Z ]+")) {
+                JOptionPane.showMessageDialog(this, "Title can only contain letters.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             for (Person person : table.getAllPeople()) {
                 if (person.getTitle() == null) {
@@ -425,7 +536,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
 
                 if (person.getTitle().equalsIgnoreCase(titleName.trim())) {
                     titleHolders.addPerson(person);
-                    System.out.println("Person with title: " + person.getName() + " " + person.getTitle() + " added succesfully");
+             
                 } else {
 
                 }
@@ -475,11 +586,6 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     "Show Forefathers",
                     JOptionPane.QUESTION_MESSAGE
             );
-
-//            if (personName == null || personName.trim().isEmpty()) {
-//                JOptionPane.showMessageDialog(this, "Name cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-//                return;
-//            }
 
             // Handle the case where the user closed the input dialog or clicked "Cancel"
             if (personName == null) {
