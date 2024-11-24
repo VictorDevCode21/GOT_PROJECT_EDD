@@ -91,7 +91,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         // Initialize the tree and other components
         this.tree = new Tree();
         setTitle("Genealogy Viewer");
-        setSize(800, 600);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         table = HashTable.getInstance();
@@ -103,6 +103,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         // Initialize the graph panel
         graphPanel = new JPanel(new BorderLayout());
         add(graphPanel, BorderLayout.CENTER);
+        
 
         // Set up the UI components (buttons, etc.)
         JPanel controlsPanel = new JPanel();
@@ -170,6 +171,18 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             }
         });
         controlsPanel.add(showByNameButton);
+        
+        
+        // Button to display the diagram
+        JButton showDiagramButton = new JButton("Show Diagram");
+        showDiagramButton.addActionListener(e -> showDiagram());
+        controlsPanel.add(showDiagramButton);
+        
+       // Ensure the controlsPanel is added to the JFrame's layout
+       add(controlsPanel, BorderLayout.SOUTH);
+
+       // Set the JFrame visible
+       setVisible(true);
 
     }
 
@@ -590,6 +603,35 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
+    
+   /**
+    * Displays a new window containing a zoomable diagram (image).
+    * 
+    * The image can be zoomed in or out using the mouse scroll wheel.
+    */
+   private void showDiagram() {
+     // Create a new JFrame to display the image
+     JFrame diagramFrame = new JFrame("Diagram Viewer");
+     diagramFrame.setSize(800, 600);
+     diagramFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+     diagramFrame.setLocationRelativeTo(null);
+
+     // Add the ZoomableImagePanel with the image
+     try {
+        ZoomableImagePanel zoomPanel = new ZoomableImagePanel("class_diagram/class_diagram.png"); // Path to the image file
+        JScrollPane scrollPane = new JScrollPane(zoomPanel); // Add scrollbars for larger images
+        diagramFrame.add(scrollPane);
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Could not load the image: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+     }
+
+     diagramFrame.setVisible(true);
+  }
+
+
 
     /**
      * Handles the logic when a node in the genealogy graph is clicked.
