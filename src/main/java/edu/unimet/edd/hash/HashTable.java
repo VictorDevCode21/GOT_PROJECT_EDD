@@ -198,6 +198,25 @@ public class HashTable {
     public int size() {
         return size;
     }
+    
+    /**
+     * Checks if the hash table is empty.
+     *
+     * @return true if the table is empty, false otherwise.
+     */
+    public boolean isEmpty() {
+        return size == 0;
+    }
+    
+    /**
+     * Clears all entries from the hash table.
+     */
+    public void removeAll() {
+        for (int i = 0; i < table.length; i++) {
+            table[i] = new LinkedList(); // Replace each bucket with a new empty LinkedList
+        }
+        size = 0; // Reset the size to zero
+    }
 
     /**
      * Retrieves all people stored in the hash table.

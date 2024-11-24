@@ -184,12 +184,33 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         if (result == JFileChooser.APPROVE_OPTION) {
             // Get the selected file
             File selectedFile = fileChooser.getSelectedFile();
+            
+            if (!selectedFile.exists() || !selectedFile.isFile()) {
+                JOptionPane.showMessageDialog(this, "Invalid file selected.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+            
+            if (!selectedFile.getName().toLowerCase().endsWith(".json")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid JSON file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+            
             try {
                 // Read the content of the selected file into a String
                 String jsonContent = new String(Files.readAllBytes(Paths.get(selectedFile.getAbsolutePath())));
+                
+                if (jsonContent.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "The selected JSON file is empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                }
 
                 // Load the genealogy data into the tree
                 LoadJson loadJson = new LoadJson();
+                
+                if(jsonContent != null && !table.isEmpty()){
+                    table.removeAll();    
+                }
+                
                 loadJson.loadGenealogy(jsonContent, tree);
                 jsonLoaded = true;
                 JOptionPane.showMessageDialog(rootPane, "JSON file correctly loaded");
