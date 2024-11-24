@@ -1,12 +1,13 @@
 package edu.unimet.edd.tree;
 
 /**
- * The GenericLinkedList class represents a generic linked list.
- * It allows adding, removing, and traversing elements.
- * 
+ * The GenericLinkedList class represents a generic linked list. It allows
+ * adding, removing, and traversing elements.
+ *
  * @param <T> The type of data the list holds (generic type).
  */
 public class GenericLinkedList<T> {
+
     private GenericNode<T> first;  // Head node of the list
     private GenericNode<T> last;  // Tail node of the list (used for efficient enqueue operations)
     private int size; // To track the size of the list
@@ -22,7 +23,7 @@ public class GenericLinkedList<T> {
 
     /**
      * Add a new node to the end of the list.
-     * 
+     *
      * @param data The data to store in the new node.
      */
     public void add(T data) {
@@ -39,7 +40,7 @@ public class GenericLinkedList<T> {
 
     /**
      * Remove and return the first element in the list.
-     * 
+     *
      * @return The data of the removed node, or null if the list is empty.
      */
     public T remove() {
@@ -57,7 +58,7 @@ public class GenericLinkedList<T> {
 
     /**
      * Check if the list is empty.
-     * 
+     *
      * @return True if the list is empty, false otherwise.
      */
     public boolean isEmpty() {
@@ -75,20 +76,25 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Retrieves the first node of the linked list.
      * @return the first
+     * 
      */
     public GenericNode<T> getFirst() {
         return first;
     }
 
     /**
+     * Sets the first node of the linked list.
      * @param first the first to set
+     * 
      */
     public void setFirst(GenericNode<T> first) {
         this.first = first;
     }
 
     /**
+     * Retrieves the last node of the linked list.
      * @return the last
      */
     public GenericNode<T> getLast() {
@@ -96,6 +102,7 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Sets the last node of the linked list.
      * @param last the last to set
      */
     public void setLast(GenericNode<T> last) {
@@ -103,6 +110,7 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Retrieves the current size of the linked list.
      * @return the size
      */
     public int getSize() {
@@ -110,9 +118,65 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Updates the size of the linked list.
      * @param size the size to set
      */
     public void setSize(int size) {
         this.size = size;
     }
+
+    /**
+     * Removes and returns the first element from the linked list. If the list
+     * is empty, it returns null.
+     *
+     * @return The first element of the list, or null if the list is empty.
+     */
+    public T removeFirst() {
+        if (first == null) { // Check if the list is empty
+            return null;
+        }
+
+        T data = first.getData(); // Store the data of the current head
+        first = first.getNext(); // Move the first to the next node
+
+        if (first == null) { // If the list is now empty, update the last
+            last = null;
+        }
+
+        size--; // Decrease the size of the list
+        return data; // Return the removed data
+    }
+
+    public String[] toArray() {
+        String[] array = new String[getSize()];
+        GenericNode current = first;
+        int index = 0;
+
+        while (current != null) {
+            array[index++] = current.getData().toString();
+            current = current.getNext();
+        }
+
+        return array;
+    }
+
+    /**
+     * Checks if the linked list contains the specified element.
+     *
+     * @param element The element to search for in the list.
+     * @return true if the element exists in the list; false otherwise.
+     */
+    public boolean contains(T element) {
+        GenericNode<T> current = first; // Start from the head of the list
+
+        while (current != null) {
+            if (current.getData().equals(element)) { // Use equals to compare elements
+                return true;
+            }
+            current = current.getNext(); // Move to the next node
+        }
+
+        return false; // Element not found
+    }
+
 }

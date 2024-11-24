@@ -4,7 +4,7 @@ import edu.unimet.edd.utils.Person;
 
 /**
  * Represents a node in a linked list.
- * This class is adapted to store an Entry<String, Person> object.
+ * This class is adapted to store an Entry&lt;String, Person&gt; object.
  */
 public class Node {
     private Entry<String, Person> value;
@@ -13,7 +13,7 @@ public class Node {
     /**
      * Constructor for the Node class.
      *
-     * @param value the value to store in the node (Entry<String, Person>)
+     * @param value the value to store in the node (Entry&lt;String, Person&gt;)
      */
     public Node(Entry<String, Person> value) {
         this.value = value;
@@ -23,7 +23,7 @@ public class Node {
     /**
      * Gets the value stored in the node.
      *
-     * @return the value of the node (Entry<String, Person>)
+     * @return the value of the node (Entry&lt;String, Person&gt;)
      */
     public Entry<String, Person> getValue() {
         return value;
@@ -32,7 +32,7 @@ public class Node {
     /**
      * Sets the value of the node.
      *
-     * @param value the new value to store in the node (Entry<String, Person>)
+     * @param value the new value to store in the node (Entry&lt;String, Person&gt;)
      */
     public void setValue(Entry<String, Person> value) {
         this.value = value;

@@ -84,7 +84,7 @@ public class LinkedList {
     /**
      * Removes and returns the first element of the LinkedList.
      *
-     * @return the removed element (Entry<String, Person>)
+     * @return the removed element (Entry&lt;String, Person&gt;)
      * @throws IllegalStateException if the list is empty
      */
     public Entry<String, Person> removeFirst() {

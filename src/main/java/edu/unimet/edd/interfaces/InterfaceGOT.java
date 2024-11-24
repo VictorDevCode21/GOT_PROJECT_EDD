@@ -295,7 +295,7 @@ public class InterfaceGOT extends javax.swing.JFrame {
     }//GEN-LAST:event_RecordActionPerformed
 
     private void searchNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchNameActionPerformed
-
+        genealogyGUI.onPersonSearch();
     }//GEN-LAST:event_searchNameActionPerformed
 
     private void showAncestorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAncestorsActionPerformed
