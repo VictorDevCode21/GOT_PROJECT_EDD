@@ -183,11 +183,11 @@ public class Tree implements HashTableListener {
         return count;
     }
 
-//    /**
-//     * Adds a person and their relationships to the genealogy tree.
-//     *
-//     * @param person The Person object to add.
-//     */
+    /**
+     * Adds a person and their relationships to the genealogy tree.
+     *
+     * @param person The Person object to add.
+     */
     public void addPerson(Person person) {
         // Generate all possible unique identifiers for this person
         String fullNameKey = normalizeName(person.getName());
@@ -266,15 +266,18 @@ public class Tree implements HashTableListener {
         }
     }
 
-    /**
-     * Creates a graph representation of the genealogy tree using GraphStream.
-     *
-     * @param personToLookFor The name of the person to search for.
-     * @param foreFathersNeeded If true, loads only the forefathers of the given
-     * person.
-     * @return A Graph object representing the genealogy tree or forefathers.
-     */
-    public Graph createGraph(String personToLookfor, boolean foreFathersNeeded, PersonLinkedList titleHolders, Integer generationNumber) {
+  /**
+   * Creates a graph representation of the genealogy tree using GraphStream.
+   *
+   * @param personToLookfor    The name of the person to search for.  
+   * @param foreFathersNeeded  If true, loads only the forefathers of the given person.
+   * @param titleHolders       A list of title holders to highlight or include in the graph. 
+   *                           If null, this parameter is ignored.
+   * @param generationNumber   The generation number to filter members by. If null, this 
+   *                           parameter is ignored.
+   * @return A Graph object representing the genealogy tree or forefathers.
+   */
+   public Graph createGraph(String personToLookfor, boolean foreFathersNeeded, PersonLinkedList titleHolders, Integer generationNumber) {
         Graph graph = new SingleGraph("GenealogyTree");
 
         // Set graph attributes

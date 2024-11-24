@@ -9,6 +9,11 @@ public class PersonLinkedList {
     private Node head;  // Head node of the list
     private int size;   // Size of the list
 
+    
+    /**
+    * Constructs an empty PersonLinkedList.
+    * 
+    */
     public PersonLinkedList() {
         this.head = null;
         this.size = 0;
@@ -100,7 +105,14 @@ public class PersonLinkedList {
     public int size() {
         return size;
     }
-
+ 
+    
+    
+    /**
+     * Checks if the linked list is empty.
+     *
+     * @return {@code true} if the list contains no elements, {@code false} otherwise.
+     */
     public boolean isEmpty() {
         return size == 0;
 
@@ -175,6 +187,9 @@ public class PersonLinkedList {
 
         private Node current;
 
+       /**
+        * Constructs a LinkedListIterator and sets the current node to the head of the list.
+        */
         public LinkedListIterator() {
             this.current = head;
         }
@@ -226,30 +241,52 @@ public class PersonLinkedList {
      */
     private class Node {
 
-        private String value;
-        private Node next;
-
+        private String value; //The value stored in the node
+        private Node next;    //A reference to the next node in the list
+        
+        
+        /**
+         * Constructs a new Node with the given value.
+         *
+         * @param value the value to be stored in this node.
+         */
         public Node(String value) {
             this.value = value;
             this.next = null;
         }
 
-        // Getter for the value of the node
+        /**
+         * Retrieves the value stored in this node.
+         *
+         * @return the value of this node.
+         */
         public String getValue() {
             return value;
         }
 
-        // Setter for the value of the node
+        /**
+         * Updates the value stored in this node.
+         *
+         * @param value the new value to be set.
+         */
         public void setValue(String value) {
             this.value = value;
         }
 
-        // Getter for the next node
+        /**
+         * Retrieves the next node connected to this node.
+         *
+         * @return the next node.
+         */
         public Node getNext() {
             return next;
         }
 
-        // Setter for the next node
+        /**
+         * Updates the reference to the next node in the list.
+        *
+        * @param next the new node to be connected as the next node.
+        */
         public void setNext(Node next) {
             this.next = next;
         }

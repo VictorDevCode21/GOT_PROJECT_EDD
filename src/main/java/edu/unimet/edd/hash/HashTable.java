@@ -53,6 +53,17 @@ public class HashTable {
 
     }
 
+    
+   /**
+    * Returns the singleton instance of the HashTable class. If the instance does
+    * not exist, it creates a new one and returns it.
+    * <p>
+    * This method ensures that only one instance of the HashTable is created and
+    * reused throughout the application.
+    * </p>
+    *
+    * @return the singleton instance of the HashTable.
+    */
     public static HashTable getInstance() {
         if (instance == null) {
             instance = new HashTable();

@@ -33,6 +33,7 @@ import org.graphstream.ui.swing_viewer.DefaultView;
  * for rendering genealogical graphs.
  * <p>
  * This class includes functionalities for:
+ * </p>
  * <ul>
  * <li>Loading genealogy data from a JSON file.</li>
  * <li>Displaying relationships and forefathers in a graph format.</li>
@@ -40,11 +41,11 @@ import org.graphstream.ui.swing_viewer.DefaultView;
  * </ul>
  * Implements the {@link HashTableListener} interface to react to changes in the
  * genealogy data stored in the hash table.
- * </p>
  *
  * @author [PC]
  * @version 1.0
  */
+
 public class GenealogyGUI extends JFrame implements HashTableListener {
 
     /**
