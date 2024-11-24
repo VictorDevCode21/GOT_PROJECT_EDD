@@ -51,6 +51,7 @@ public class InterfaceGOT extends javax.swing.JFrame {
         searchTitle = new javax.swing.JButton();
         membersGeneration = new javax.swing.JButton();
         Separator = new javax.swing.JSeparator();
+        Diagram = new javax.swing.JButton();
         loadTree = new javax.swing.JButton();
         xBar = new javax.swing.JPanel();
         xBackground = new javax.swing.JPanel();
@@ -145,12 +146,24 @@ public class InterfaceGOT extends javax.swing.JFrame {
         Separator.setForeground(new java.awt.Color(255, 255, 255));
         Menu.add(Separator, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 112, 180, 30));
 
+        Diagram.setBackground(new java.awt.Color(128, 139, 147));
+        Diagram.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        Diagram.setForeground(new java.awt.Color(255, 255, 255));
+        Diagram.setText("Diagram");
+        Diagram.setBorder(null);
+        Diagram.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DiagramActionPerformed(evt);
+            }
+        });
+        Menu.add(Diagram, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 380, 220, 40));
+
         Background.add(Menu, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 220, 530));
 
         loadTree.setBackground(new java.awt.Color(128, 139, 147));
         loadTree.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
         loadTree.setForeground(new java.awt.Color(255, 255, 255));
-        loadTree.setText("Load Tree");
+        loadTree.setText("Load JSON");
         loadTree.setBorder(null);
         loadTree.setBorderPainted(false);
         loadTree.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -159,7 +172,7 @@ public class InterfaceGOT extends javax.swing.JFrame {
                 loadTreeActionPerformed(evt);
             }
         });
-        Background.add(loadTree, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 480, 120, 30));
+        Background.add(loadTree, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 480, 120, 30));
 
         xBar.setBackground(new java.awt.Color(255, 255, 255));
         xBar.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
@@ -329,6 +342,10 @@ public class InterfaceGOT extends javax.swing.JFrame {
 
     }//GEN-LAST:event_loadTreeActionPerformed
 
+    private void DiagramActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DiagramActionPerformed
+        genealogyGUI.onDiagram();
+    }//GEN-LAST:event_DiagramActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -427,6 +444,7 @@ public class InterfaceGOT extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Background;
+    private javax.swing.JButton Diagram;
     private javax.swing.JLabel Exit;
     private javax.swing.JPanel Menu;
     private javax.swing.JButton Record;
