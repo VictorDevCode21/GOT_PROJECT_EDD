@@ -308,16 +308,50 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         JOptionPane.showMessageDialog(this,
                 "Generations have been assigned based on the " + totalGenerations + " levels.",
                 "Generations Info", JOptionPane.INFORMATION_MESSAGE);
+        
 
         // Prompt the user to select a generation
         Integer selectedGeneration = -1;
+        int userInput = -1; 
+        boolean validInput = false;
+        
+        while (!validInput) {
         try {
             String input = JOptionPane.showInputDialog(
                     this, "Select a generation number that must be less or equal to: " + (totalGenerations),
                     "Select Generation", JOptionPane.QUESTION_MESSAGE
             );
+            
+            
             if (input != null) {
                 selectedGeneration = Integer.parseInt(input);
+            }
+            
+            if (input == null) {
+                JOptionPane.showMessageDialog(this, "Operation cancelled.", "Info", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+   
+            userInput = Integer.parseInt(input);
+            //if (input > totalGenerations){
+            
+            // Check if the input is numeric and within the valid range
+            if (input.matches("\\d+")) {
+                userInput = Integer.parseInt(input);
+
+                // Validate if the number is within the valid range
+                if (userInput > 0 && userInput <= totalGenerations) {
+                    validInput = true; // Exit loop if valid input
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Invalid! Please enter a number between 1 and " + totalGenerations + ".",
+                            "Error", JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid generation number.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid generation number.",
@@ -325,11 +359,13 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             return;
         }
 
-        if (selectedGeneration != -1) {
-            updateGraphDisplay(null, false, null, selectedGeneration);
-        } else {
-            return;
+//        if (selectedGeneration != -1) {
+//            updateGraphDisplay(null, false, null, selectedGeneration);
+//        } else {
+//            return;
         }
+         // At this point, validInput is true and we can proceed
+        updateGraphDisplay(null, false, null, userInput); // Assuming the method accepts generation number
     }
 
     /**
