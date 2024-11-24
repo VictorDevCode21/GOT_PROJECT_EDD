@@ -116,7 +116,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         JButton seeRegisterButton = new JButton("See Register");
         seeRegisterButton.addActionListener(e -> {
             if (jsonLoaded) {
-                updateGraphDisplay(null, false, null, null);
+                updateGraphDisplay(null, false, null, null, null);
             } else {
                 JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
                 return;
@@ -160,6 +160,17 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         });
         controlsPanel.add(showGenerationButton);
 
+        // Button to execute event for showing title holders
+        JButton showByNameButton = new JButton("Find by name");
+        showByNameButton.addActionListener(e -> {
+            if (jsonLoaded) {
+                showByName();
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+            }
+        });
+        controlsPanel.add(showByNameButton);
+
     }
 
     /**
@@ -194,6 +205,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 loadJson.loadGenealogy(jsonContent, tree);
                 jsonLoaded = true;
                 JOptionPane.showMessageDialog(rootPane, "JSON file correctly loaded");
+                table.removeDuplicates();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -214,10 +226,10 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
      * @param foreFathersNeeded Flag to display only forefathers.
      * @param titleName List of title holders to display, or null for none.
      */
-    private void updateGraphDisplay(String personToLookFor, boolean foreFathersNeeded, PersonLinkedList titleName, Integer generationNumber) {
+    private void updateGraphDisplay(String personToLookFor, boolean foreFathersNeeded, PersonLinkedList titleName, Integer generationNumber, String personToFind) {
         try {
             // Create the graph based on the current tree data
-            Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded, titleName, generationNumber);
+            Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded, titleName, generationNumber, personToFind);
 
 //        System.out.println("Table size in GenealogyGUI: " + table.size());
             // If a viewer already exists, close its previous view to avoid conflicts
@@ -255,7 +267,11 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 view.addMouseListener(new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked(java.awt.event.MouseEvent e) {
-                        handleNodeClick(graph, e);
+                        try {
+                            handleNodeClick(graph, e);
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(rootPane, "Error trying to select person because its null: " + e);
+                        }
                     }
                 });
             } else {
@@ -271,7 +287,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
 //            System.out.println("Null Pointer Error: " + e.getMessage());
 //            JOptionPane.showMessageDialog(this, "Unable to retrieve graph data. Please ensure the data is correctly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected Error: " + e.getMessage());
+            System.out.println("Unexpected Error Here: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -281,55 +297,177 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
      * their level in the tree and updates the HashTable with the changes.
      */
     private void showGenerationMembers() {
-        if (!jsonLoaded) {
-            JOptionPane.showMessageDialog(this, "You need to load a JSON file first.");
-            return;
-        }
-
-        // Retrieve the root of the tree
-        TreeNode root = tree.getRoot();
-
-        if (root == null) {
-            JOptionPane.showMessageDialog(this, "The tree is empty.");
-            return;
-        }
-
-        tree.setFatherForUndetailedChildren();
-
-        // Use the BFS method from the Tree class
-        Integer totalGenerations = tree.BFS(node -> {
-
-        });
-        
-        // Due to the iteration of bfs, less 1 to the max value of generations
-        totalGenerations = totalGenerations -1;
-        
-
-        // Show the total number of generations (equal to the depth of the tree)
-        JOptionPane.showMessageDialog(this,
-                "Generations have been assigned based on the " + totalGenerations + " levels.",
-                "Generations Info", JOptionPane.INFORMATION_MESSAGE);
-
-        // Prompt the user to select a generation
-        Integer selectedGeneration = -1;
         try {
-            String input = JOptionPane.showInputDialog(
-                    this, "Select a generation number that must be less or equal to: " + (totalGenerations),
-                    "Select Generation", JOptionPane.QUESTION_MESSAGE
-            );
-            if (input != null) {
-                selectedGeneration = Integer.parseInt(input);
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid generation number.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            // Run long-running tasks in a background thread
+            System.out.println("ESTO SE IMPRIME");
+            new Thread(() -> {
+                System.out.println("ESTO TAMBIEN");
+                try {
+                    TreeNode root = null;
+                    try {
+                        root = tree.getRoot();
+                        System.out.println("Root successfully retrieved.");
+                    } catch (Exception e) {
+                        System.out.println("Error retrieving root: " + e.getMessage());
+                        e.printStackTrace(System.out);;
+                    }
 
-        if (selectedGeneration != -1) {
-            updateGraphDisplay(null, false, null, selectedGeneration);
-        } else {
-            return;
+                    if (root != null) {
+                        System.out.println("Tree root: " + root.getPerson().getName());
+                    } else {
+                        System.out.println("Tree root is null.");
+                    }
+                    System.out.println("Tree contains " + tree.countTreeNodes() + " nodes.");
+
+                    // Use the BFS method from the Tree class
+                    Integer totalGenerations = tree.BFS(node -> {
+                    });
+
+                    // Prompt for user input in the EDT
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            String input = JOptionPane.showInputDialog(
+                                    this, "Select a generation number that must be less or equal to: " + totalGenerations,
+                                    "Select Generation", JOptionPane.QUESTION_MESSAGE);
+
+                            if (input != null) {
+                                int selectedGeneration = Integer.parseInt(input);
+
+                                if (selectedGeneration <= totalGenerations && selectedGeneration >= 0) {
+                                    updateGraphDisplay(null, false, null, selectedGeneration, null);
+                                } else {
+                                    JOptionPane.showMessageDialog(this, "Generation number out of range.",
+                                            "Error", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid generation number.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE));
+                }
+            }).start();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "An unexpected error occurred: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Displays a dialog allowing the user to search for a person by name. The
+     * user is prompted to input a name, and the system searches for matching
+     * names in the tree. If matches are found, a list of names is displayed for
+     * the user to select from. Once a name is selected, the system can update
+     * the graph display based on the selected person.
+     *
+     * <p>
+     * If no matches are found or an error occurs during the process,
+     * appropriate messages are shown to the user.</p>
+     *
+     * <p>
+     * This method includes the following steps:</p>
+     * <ul>
+     * <li>Prompts the user to input a name.</li>
+     * <li>Searches for matching names in the tree.</li>
+     * <li>If matches are found, displays a list of results for the user to
+     * select from.</li>
+     * <li>Updates the graph display with the selected name.</li>
+     * <li>Handles cases where no name is entered or selected.</li>
+     * <li>Catches and displays any errors that occur during the process.</li>
+     * </ul>
+     *
+     * @throws Exception if an error occurs while processing the name input or
+     * updating the graph.
+     */
+    private void showByName() {
+        try {
+            // Prompt the user to input a name or part of a name
+            String name = JOptionPane.showInputDialog(
+                    this,
+                    "Introduce a name: ",
+                    "Find by name",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            // Check if the input name is null or empty
+            if (name == null || name.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Introduce a name please.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // Search for matches in the tree
+            GenericLinkedList coincidences = tree.findPersonByName(name);
+
+            if (coincidences == null || coincidences.getSize() == 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No matches found for the name: " + name,
+                        "No Matches",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                return;
+            }
+
+            // Convert the coincidences to a String array for the JList
+            String[] names = coincidences.toArray();
+
+            // Create a JList to display the names
+            JList<String> nameList = new JList<>(names);
+            nameList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            nameList.setVisibleRowCount(5); // Número visible de filas
+
+            // Display the dialog for the user to select a name
+            JScrollPane scrollPane = new JScrollPane(nameList);
+
+            // Check if the user selected a name
+            int result = JOptionPane.showConfirmDialog(
+                    this,
+                    scrollPane,
+                    "Select a name",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE
+            );
+
+            // Verifica si el usuario seleccionó un nombre
+            if (result == JOptionPane.OK_OPTION) {
+                String selectedName = nameList.getSelectedValue();
+                if (selectedName != null) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "You selected: " + selectedName,
+                            "Selection",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    // Logic to handle the selection (e.g., update graph display)
+                    // Update graph display with the name of the person to find its descent
+                    updateGraphDisplay(null, false, null, null, selectedName);
+
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "No name selected.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "An error occurred. Please try again." + e,
+                    "Error: " + e,
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -378,7 +516,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             }
 
             try {
-                updateGraphDisplay(null, false, titleHolders, null);
+                updateGraphDisplay(null, false, titleHolders, null, null);
             } catch (Exception e) {
                 System.out.println("Exception: " + e);
             }
@@ -439,7 +577,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             foreFathersNeeded = true;
 
             // Display the graph using the existing method
-            updateGraphDisplay(personName.trim(), foreFathersNeeded, null, null);
+            updateGraphDisplay(personName.trim(), foreFathersNeeded, null, null, null);
 
             JOptionPane.showMessageDialog(this,
                     "Click a node in the graph to view its details.",
