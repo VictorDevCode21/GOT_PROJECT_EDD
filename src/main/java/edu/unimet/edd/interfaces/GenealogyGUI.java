@@ -226,7 +226,8 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         if (jsonLoaded) {
             updateGraphDisplay(null, false, null, null, null);
        } else {
-           JOptionPane.showMessageDialog(null, "You need to Load a JSON file first");
+           JOptionPane.showMessageDialog(null, "You need to Load a JSON file first! ");
+           this.show(false);
            return;
        }
        JOptionPane.showMessageDialog(null,
