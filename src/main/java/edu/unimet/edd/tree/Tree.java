@@ -42,13 +42,25 @@ public class Tree implements HashTableListener {
      * @return The root node of the tree, or null if not found.
      */
     public TreeNode getRoot() {
-        for (Person person : table.getAllPeople()) {
-            if (person.getFather() == null || person.getFather().equalsIgnoreCase("[unknown]")) {
-                // Create the root node with the Person object
-                TreeNode rootNode = new TreeNode(person, null);
-                addChildren(rootNode); // Add children to this root node
-                return rootNode;
+        try {
+            for (Person person : table.getAllPeople()) {
+                System.out.println("Checking person: " + person.getName() + ", Father: " + person.getFather());
+                if (person.getFather() == null || person.getFather().equalsIgnoreCase("[unknown]")) {
+                    System.out.println("Found root: " + person.getName());
+                    // Create the root node with the Person object
+                    TreeNode rootNode = new TreeNode(person, null);
+                    try {
+                        GenericSet set = new GenericSet();
+                        addChildren(rootNode, set);
+                        System.out.println("Children added");
+                    } catch (Exception e) {
+                        System.out.println("Error adding children to root node: " + e.getMessage());
+                    }
+                    return rootNode;
+                }
             }
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
         }
         return null; // Return null if no root is found
     }
@@ -61,31 +73,56 @@ public class Tree implements HashTableListener {
      *
      * @param parent The parent TreeNode to which children will be added.
      */
-    private void addChildren(TreeNode parent) {
+    /**
+     * Adds children to the given parent TreeNode by searching the hash table
+     * for matching father names.
+     *
+     * @param parent The parent TreeNode to which children will be added.
+     */
+    private void addChildren(TreeNode parent, GenericSet<TreeNode> visited) {
         // Queue to manage nodes to process
         GenericLinkedList<TreeNode> queue = new GenericLinkedList<>();
+        System.out.println("Adding parent to queue: " + parent.getPerson().getName());
         queue.add(parent);
 
         // Process each node in the queue
         while (!queue.isEmpty()) {
             TreeNode currentNode = queue.remove();
             String currentName = normalizeName(currentNode.getPerson().getName());
+            System.out.println("Processing node: " + currentNode.getPerson().getName());
+
+            // Skip the node if it has already been visited
+            if (visited.contains(currentNode)) {
+                System.out.println("Already visited: " + currentNode.getPerson().getName());
+                continue;  // Skip the current node if already visited
+            }
+
+            // Mark this node as visited
+            visited.add(currentNode);
 
             // Iterate through all people to find matching children
             for (Person person : table.getAllPeople()) {
+                System.out.println("Checking person: " + person.getName() + ", Father: " + person.getFather());
+
                 if (person.getFather() != null) {
-                    // Check if the person's father matches the current node's name
                     String fatherName = normalizeName(person.getFather());
+                    System.out.println("Father name (normalized): " + fatherName);
+
+                    // Ensure more strict matching of father
                     if (fatherName.equals(currentName)
-                            || person.getFather().equalsIgnoreCase(currentNode.getPerson().getNickname())
-                            || getFirstAndLastName(person.getFather()).equalsIgnoreCase(getFirstAndLastName(currentNode.getPerson().getName()))) {
+                            || person.getFather().equalsIgnoreCase(currentNode.getPerson().getNickname())) {
+                        System.out.println("Match found: Adding child " + person.getName() + " to parent " + currentNode.getPerson().getName());
 
                         // Create a new TreeNode for the child
                         TreeNode childNode = new TreeNode(person, currentNode);
                         currentNode.addChild(childNode); // Add the child to the parent node
+                        System.out.println("Child " + person.getName() + " added to parent " + currentNode.getPerson().getName());
 
-                        // Add the child to the queue for further processing
-                        queue.add(childNode);
+                        // Add the child to the queue for further processing, ensure no duplicates
+                        if (!visited.contains(childNode)) {  // Verify before adding to queue
+                            queue.add(childNode);
+                            System.out.println("Child " + person.getName() + " added to queue.");
+                        }
                     }
                 }
             }
@@ -107,36 +144,46 @@ public class Tree implements HashTableListener {
         TreeNode root = getRoot();
 
         if (root == null) {
-            return -1;
+            return 0;
         }
 
         queue.add(root);
         int currentGeneration = 1;
 
+        GenericSet<TreeNode> visited = new GenericSet<>();  // Set to track visited nodes
+
         while (!queue.isEmpty()) {
             int levelSize = queue.getSize();
 
-            // Process all nodes at the current level
             for (int i = 0; i < levelSize; i++) {
                 TreeNode current = queue.remove();
+
+                // Detect cycles
+                if (visited.contains(current)) {
+                    throw new IllegalStateException("Cycle detected in the tree at node: " + current.getPerson().getName());
+                }
+                visited.add(current);
+
                 processNode.accept(current);
 
-                // Update generation information only once per node
+                // Update generation information
                 Person person = current.getPerson();
                 person.setGeneration(currentGeneration);
                 table.put(person.getName(), person);
 
-                // Enqueue all children of the current node
+                // Enqueue all children
                 GenericNode<TreeNode> childNode = current.getChildren().getFirst();
                 while (childNode != null) {
-                    queue.add(childNode.getData());
+                    TreeNode child = childNode.getData();
+                    if (!visited.contains(child)) {  // Verify before adding to queue
+                        queue.add(child);
+                    }
                     childNode = childNode.getNext();
                 }
             }
-
             currentGeneration++;
         }
-        return currentGeneration;
+        return currentGeneration - 1;
     }
 
     /**
@@ -180,14 +227,15 @@ public class Tree implements HashTableListener {
         return count;
     }
 
-//    /**
-//     * Adds a person and their relationships to the genealogy tree.
-//     *
-//     * @param person The Person object to add.
-//     */
+    /**
+     * Adds a person and their relationships to the genealogy tree.
+     *
+     * @param person The Person object to add.
+     */
     public void addPerson(Person person) {
         // Generate all possible unique identifiers for this person
         String fullNameKey = normalizeName(person.getName());
+
         String nicknameKey = person.getNickname() != null ? normalizeName(person.getNickname()) : null;
 
         // Check if this person already exists using any key
@@ -199,16 +247,26 @@ public class Tree implements HashTableListener {
 
         // Check if the person has a father
         if (person.getFather() != null) {
+//            System.out.println("\n -------- \n");
+
             // Get the father's normalized name
             String fatherName = normalizeName(person.getFather());
+//            System.out.println("Obteniendo padre de: "  + person.getName() + " que es: "  + fatherName);
 
             // Try to find the father in the HashTable
             Person father = table.get(fatherName);
 
             if (father == null) {
+//                System.out.println("Father es null: " + person.getName());
                 Person[] all = table.getAllPeople();
                 for (int i = 0; i < table.getAllPeople().length; i++) {
                     String temp = all[i].getName();
+
+                    if (person.getFather().equalsIgnoreCase(all[i].getNickname())) {
+                        person.setFather(normalizeName(temp));
+                        father = table.get(temp);
+//                        System.out.println("El papa de: " + person.getName() + " se encontro: " + temp);
+                    }
 
                     if (temp == null) {
                         continue;
@@ -222,14 +280,31 @@ public class Tree implements HashTableListener {
 
             }
 
-            // If the father exists, check for duplicate children
+//            Person[] all = table.getAllPeople();
+//            for (Person person2 : all) {
+//                if (person.getName().equalsIgnoreCase(person2.getName())) {
+//                    System.out.println("Este se esta repitiendo: " + fullNameKey);
+//                }
+//            }
+            // If the father exists, check for duplicate children and set his name in the correct format
             if (father != null) {
+//                System.out.println("Antes del cambio: ");
+//                System.out.println("Person Name: " + person.getName());
+//                System.out.println("Father Name: " + person.getFather());
+
+                String tempFatherName = normalizeName(father.getName());
+                person.setFather(tempFatherName);
+
+//                System.out.println("Despues del cambio: ");
+//                System.out.println("Person Name: " + person.getName());
+//                System.out.println("Father Name: " + person.getFather());
                 // Remove duplicates and then add the child
                 String duplicatedChildName = person.checkDuplicateChild(father, person.getName(), table);
 
                 if (duplicatedChildName != null) {
 //                    if (table.get(duplicatedChildName) == null)
                     Boolean deleted = table.remove(duplicatedChildName);
+
                     if (deleted == true) {
                     }
 
@@ -240,7 +315,69 @@ public class Tree implements HashTableListener {
             // Add the person using all possible keys
             addPersonToHashTable(person, fullNameKey, nicknameKey);
 
+//            System.out.println("Padre de la persona: " + person.getName() + " es: " + person.getFather());
         }
+//        System.out.println("\nSEPARADO");
+//        Person[] all = table.getAllPeople();
+//        for (Person person2 : all) {
+//            System.out.println("Persona: " + person2.getName());
+//        }
+    }
+
+    public GenericLinkedList findPersonByName(String nameToSearchFor) {
+//        System.out.println("Table size in Tree: " + table.size());
+//        System.out.println("Name to search for: " + nameToSearchFor);
+        Person[] all = table.getAllPeople();
+        GenericLinkedList coincidences = new GenericLinkedList();
+
+//        System.out.println("\n---------------------------------------\n");
+//        if (table.get("robert baratheon first of his name") == null) {
+//            System.out.println("NULL ");
+//        }
+        for (Person person : all) {
+            if (person == null || person.getName() == null) {
+                System.out.println("Skipping null person or person with null name");
+                continue; // Ignorar personas nulas
+            }
+//            System.out.println("Buscando coincidencia con: " + person.getName());
+            String personName = normalizeName(getFirstName(person.getName()));
+            String mote = person.getNickname();
+
+//            System.out.println("\nPerson Name\n: " + personName);
+//            if (mote != null) {
+//                System.out.println("\nMote\n" + mote);
+//            }
+            if (personName.equalsIgnoreCase(nameToSearchFor)) {
+//                System.out.println("Coincidence in name: " + nameToSearchFor + " with: " + person.getName());
+                coincidences.add(person.getName());
+//                System.out.println("Se llama: " + person.getName());
+//                System.out.println("Veamos si es null");
+                if (table.get(person.getName()) != null) {
+//                    System.out.println(" Si lo esta encontrando" + person.getName());
+                } else {
+//                    System.out.println(person.getName() + " ...Es null");
+                }
+            } else if (mote != null && mote.equalsIgnoreCase(nameToSearchFor)) {
+//                System.out.println("Coincidence in mote for: " + personName);
+                coincidences.add(person.getName());
+            }
+        }
+
+        return coincidences;
+
+    }
+
+    private String getFirstName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) {
+            return "";
+        }
+
+        String[] part = fullName.split(" ");
+
+        if (part.length == 1) {
+            return fullName;
+        }
+        return part[0];
     }
 
     /**
@@ -254,20 +391,43 @@ public class Tree implements HashTableListener {
         if (fullNameKey != null) {
             table.put(fullNameKey, person);
         }
-        if (nicknameKey != null) {
-            table.put(nicknameKey, person);
-        }
+
+//        if (nicknameKey != null) {
+//            table.put(nicknameKey, person);
+//        }
     }
+
+
+  /**
+   * Creates a graph representation of the genealogy tree using GraphStream.
+   *
+   * @param personToLookfor    The name of the person to search for.  
+   * @param foreFathersNeeded  If true, loads only the forefathers of the given person.
+   * @param titleHolders       A list of title holders to highlight or include in the graph. 
+   *                           If null, this parameter is ignored.
+   * @param generationNumber   The generation number to filter members by. If null, this 
+   *                           parameter is ignored.
+   * @return A Graph object representing the genealogy tree or forefathers.
+   */
+   
 
     /**
      * Creates a graph representation of the genealogy tree using GraphStream.
      *
-     * @param personToLookFor The name of the person to search for.
+     * 
+     * @param personToLookfor The name of the person to search for to show its
+     * forefathers.
+     * @param personToFind The name of the person to search for to show its
+     * descent
+     * @param titleHolders A list of title holders for a specific generation.
+     * @param generationNumber The generation number to load if specific members 
+     * of that generation need to be displayed.
      * @param foreFathersNeeded If true, loads only the forefathers of the given
      * person.
      * @return A Graph object representing the genealogy tree or forefathers.
      */
-    public Graph createGraph(String personToLookfor, boolean foreFathersNeeded, PersonLinkedList titleHolders, Integer generationNumber) {
+    public Graph createGraph(String personToLookfor, boolean foreFathersNeeded, PersonLinkedList titleHolders, Integer generationNumber, String personToFind) {
+
         Graph graph = new SingleGraph("GenealogyTree");
 
         // Set graph attributes
@@ -281,10 +441,124 @@ public class Tree implements HashTableListener {
             loadTitleHoldersGraph(graph, titleHolders);
         } else if (generationNumber != null) {
             loadGenerationMembersGraph(graph, generationNumber);
+        } else if (personToFind != null) {
+            loadDescentGraph(graph, personToFind);
         } else {
             loadAllLineageGraph(graph);
         }
         return graph;
+    }
+
+    /**
+     * Loads the descent graph starting from the selected father, finding
+     * descendants iteratively. Adds nodes for each descendant and edges between
+     * the father and the descendant.
+     *
+     * @param graph The graph to add nodes and edges to.
+     * @param selectedName The name of the father to start the descent search.
+     */
+    private void loadDescentGraph(Graph graph, String selectedName) {
+        // Set to store unique descendants (no duplicates allowed)
+        GenericSet descendants = new GenericSet();
+
+        // Find the selected father in the table
+        Person father = table.get(selectedName.trim());
+
+        // Debug message: check if the father is found
+        if (father == null) {
+            System.out.println("Father is null");
+            return; // If father is null, exit the method
+        }
+        System.out.println("Father found: " + father.getName());
+
+        // Add the father's node to the graph
+        String fatherName = father.getName();
+        if (graph.getNode(fatherName) == null) {
+            try {
+                graph.addNode(fatherName).setAttribute("ui.label", fatherName);
+                System.out.println("Node added: " + fatherName);
+            } catch (Exception e) {
+                System.out.println("Error adding node for father: " + fatherName + " Exception: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Node already exists for father: " + fatherName);
+        }
+
+        // Queue to manage descendants iteratively
+        GenericQueue<Person> queue = new GenericQueue<>();
+        queue.enqueue(father); // Start the search with the selected father
+
+        // Iterate as long as there are elements in the queue
+        while (!queue.isEmpty()) {
+            // Dequeue the next person to process
+            Person current = queue.dequeue();
+            System.out.println("Processing: " + current.getName());
+
+            // Iterate over all people in the table to find children
+            for (Person person : table.getAllPeople()) {
+                // Debug: check if person has a father and if father matches the current person's name
+                if (person.getFather() != null) {
+                    System.out.println("Person: " + person.getName() + ", Father: " + person.getFather());
+
+                    // If the person has the current person as their father, it's a descendant
+                    if (person.getFather().equalsIgnoreCase(current.getName())) {
+                        // Ensure the descendant is not already in the set
+                        if (!descendants.contains(person.getName())) {
+                            // Add the person to the descendants set
+                            descendants.add(person.getName());
+                            System.out.println("Descendant added: " + person.getName());
+
+                            // Enqueue the person to check their descendants
+                            queue.enqueue(person);
+                        }
+                    }
+                } else {
+                    System.out.println("Person " + person.getName() + " has no father.");
+                }
+            }
+        }
+
+        // After all the descendants are processed, create the nodes for the descendants
+        for (String descendant : descendants.toArray()) {
+            String descendantName = descendant;
+
+            // Check if node already exists before adding it to avoid duplicates
+            if (graph.getNode(descendantName) == null) {
+                try {
+                    graph.addNode(descendantName).setAttribute("ui.label", descendantName);
+                    System.out.println("Node added: " + descendantName);
+                } catch (Exception e) {
+                    System.out.println("Error adding node: " + descendantName + " Exception: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Node already exists: " + descendantName);
+            }
+        }
+
+        // Now that all nodes have been added, we can create the edges based on father-child relationships
+        for (Person person : table.getAllPeople()) {
+            // Check if the person has a father
+            if (person.getFather() != null) {
+                String fatherName2 = person.getFather();
+                String childName = person.getName();
+
+                // Attempt to create an edge between the father and the child
+                String edgeId = fatherName2 + "-" + childName;
+                System.out.println("Attempting to create edge: " + edgeId);
+
+                // Create the edge if it doesn't already exist
+                if (graph.getEdge(edgeId) == null) {
+                    try {
+                        graph.addEdge(edgeId, fatherName2, childName, true); // Directed edge
+                        System.out.println("Edge created: " + edgeId);
+                    } catch (Exception e) {
+                        System.out.println("Error creating edge: " + edgeId + " Exception: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("Edge already exists: " + edgeId);
+                }
+            }
+        }
     }
 
     /**
