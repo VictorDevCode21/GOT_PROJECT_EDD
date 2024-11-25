@@ -1,15 +1,13 @@
 package edu.unimet.edd.interfaces;
 
-
-
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-
 import edu.unimet.edd.tree.Tree;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -17,22 +15,19 @@ import javax.swing.JPanel;
  * @author Chantal
  */
 public class InterfaceGOT extends javax.swing.JFrame {
-    
+
     private GenealogyGUI genealogyGUI;
     private boolean isGraphShown = false;
     private Tree tree;
-    
 
     /**
      * Creates new form InterfazGOT
      */
-    
     int xMouse, yMouse;
-    
+
     public InterfaceGOT() {
         initComponents();
-            }
-
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -290,7 +285,9 @@ public class InterfaceGOT extends javax.swing.JFrame {
     }//GEN-LAST:event_ExitMouseExited
 
     private void RecordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RecordActionPerformed
-
+        if (genealogyGUI == null) {
+            JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        }
         genealogyGUI.onRegister();
     }//GEN-LAST:event_RecordActionPerformed
 
@@ -299,33 +296,42 @@ public class InterfaceGOT extends javax.swing.JFrame {
     }//GEN-LAST:event_searchNameActionPerformed
 
     private void showAncestorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAncestorsActionPerformed
-
+        if (genealogyGUI == null) {
+            JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        }
         genealogyGUI.onShowForefathers();
     }//GEN-LAST:event_showAncestorsActionPerformed
 
     private void searchTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTitleActionPerformed
-        
+        if (genealogyGUI == null) {
+            JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        }
         genealogyGUI.onshowTitleHolders();
     }//GEN-LAST:event_searchTitleActionPerformed
 
     private void membersGenerationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_membersGenerationActionPerformed
+        if (genealogyGUI == null) {
+            JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        }
+
         genealogyGUI.onshowGenerationMembers();
     }//GEN-LAST:event_membersGenerationActionPerformed
 
     private void loadTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadTreeActionPerformed
         if (genealogyGUI == null) {  // Solo crea la instancia una vez
-        genealogyGUI = new GenealogyGUI();
+            genealogyGUI = new GenealogyGUI();
         }
-        
-        genealogyGUI.loadTreeLoaded(); 
+
+        genealogyGUI.loadTreeLoaded();
 
         if (!genealogyGUI.isVisible()) {
             genealogyGUI.setVisible(true);  // Asegúrate de que solo se abra si no está visible
         } else {
             genealogyGUI.requestFocus();  // Si ya está abierta, tráela al frente
         }
-            
-           
+
+        genealogyGUI.onRegister();
+
 
     }//GEN-LAST:event_loadTreeActionPerformed
 
