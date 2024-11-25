@@ -15,9 +15,15 @@ public class LinkedListListeners {
      */
     private class Node {
 
-        HashTableListener listener;
-        Node next;
+        HashTableListener listener; // The listener associated with this node
+        Node next; // Reference to the next node in the list
 
+        
+       /**
+        * Constructs a new Node with the given listener.
+        *
+        * @param listener The `HashTableListener` object to store in this node.
+        */
         public Node(HashTableListener listener) {
             this.listener = listener;
             this.next = null;

@@ -2,8 +2,9 @@ package edu.unimet.edd.interfaces;
 
 import edu.unimet.edd.hash.HashTable;
 import edu.unimet.edd.listeners.HashTableListener;
+import edu.unimet.edd.listeners.RegisterListener;
+import edu.unimet.edd.listeners.TreeLoadListener;
 import edu.unimet.edd.tree.GenericLinkedList;
-import edu.unimet.edd.tree.GenericNode;
 import edu.unimet.edd.tree.Tree;
 import edu.unimet.edd.tree.TreeNode;
 import edu.unimet.edd.utils.LoadJson;
@@ -12,20 +13,16 @@ import edu.unimet.edd.utils.PersonLinkedList;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swing_viewer.SwingViewer;  // Use SwingViewer instead of Viewer
 import org.graphstream.ui.view.Viewer;
-import org.graphstream.algorithm.Toolkit;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.commons.math3.util.Pair;
 import org.graphstream.graph.Node;
 import org.graphstream.stream.ProxyPipe;
 import org.graphstream.ui.geom.Point3;
-import org.graphstream.ui.swing_viewer.DefaultView;
 
 /**
  * GenealogyGUI is the main graphical interface for visualizing and interacting
@@ -33,6 +30,7 @@ import org.graphstream.ui.swing_viewer.DefaultView;
  * for rendering genealogical graphs.
  * <p>
  * This class includes functionalities for:
+ * </p>
  * <ul>
  * <li>Loading genealogy data from a JSON file.</li>
  * <li>Displaying relationships and forefathers in a graph format.</li>
@@ -40,11 +38,11 @@ import org.graphstream.ui.swing_viewer.DefaultView;
  * </ul>
  * Implements the {@link HashTableListener} interface to react to changes in the
  * genealogy data stored in the hash table.
- * </p>
  *
  * @author [PC]
  * @version 1.0
  */
+
 public class GenealogyGUI extends JFrame implements HashTableListener {
 
     /**
@@ -81,6 +79,20 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
      * Flag indicating if forefathers are to be displayed in the graph.
      */
     private boolean foreFathersNeeded = false;
+    
+    /**
+    * Listener responsible for handling events related to loading a tree.
+    * This listener is used to respond to specific actions or updates
+    * when the tree structure is loaded.
+    */
+    private TreeLoadListener listener;
+    
+    /**
+     * Listener responsible for handling events related to user registration or data registration.
+     * This listener is triggered when a new registration action occurs or when the registration
+     * state needs to be updated.
+     */
+    private RegisterListener RegisterListener;
 
     /**
      * Constructs the GenealogyGUI interface. Initializes the components, sets
@@ -90,7 +102,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         // Initialize the tree and other components
         this.tree = new Tree();
         setTitle("Genealogy Viewer");
-        setSize(800, 600);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         table = HashTable.getInstance();
@@ -102,75 +114,203 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         // Initialize the graph panel
         graphPanel = new JPanel(new BorderLayout());
         add(graphPanel, BorderLayout.CENTER);
+        
 
-        // Set up the UI components (buttons, etc.)
-        JPanel controlsPanel = new JPanel();
-        JButton loadButton = new JButton("Load Tree");
-        loadButton.addActionListener(e -> loadTree());  // Action listener for the button
-        controlsPanel.add(loadButton);
+//        // Set up the UI components (buttons, etc.)
+//        JPanel controlsPanel = new JPanel();
+//        JButton loadButton = new JButton("Load Tree");
+//        loadButton.addActionListener(e -> loadTree());  // Action listener for the button
+//        controlsPanel.add(loadButton);
+//
+//        add(controlsPanel, BorderLayout.SOUTH);
+//
+//        // Add a "See Register" button
+//        JButton seeRegisterButton = new JButton("See Register");
+//        seeRegisterButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                updateGraphDisplay(null, false, null, null);
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//                return;
+//            }
+//
+//            JOptionPane.showMessageDialog(this,
+//                    "Click a node in the graph to view its details.",
+//                    "Info", JOptionPane.INFORMATION_MESSAGE);
+//        });
+//        controlsPanel.add(seeRegisterButton);
+//
+//        JButton showForefathersButton = new JButton("Show Forefathers");
+//        showForefathersButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showForefathers();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showForefathersButton);
+//
+//        // Button to execute event for showing title holders
+//        JButton showTitleHoldersButton = new JButton("Show title holders");
+//        showTitleHoldersButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showTitleHolders();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showTitleHoldersButton);
+//
+//        // Button to execute event for showing title holders
+//        JButton showGenerationButton = new JButton("Show Generation");
+//        showGenerationButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showGenerationMembers();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showGenerationButton);
 
-        add(controlsPanel, BorderLayout.SOUTH);
-
-        // Add a "See Register" button
-        JButton seeRegisterButton = new JButton("See Register");
-        seeRegisterButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                updateGraphDisplay(null, false, null, null, null);
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-                return;
-            }
-
-            JOptionPane.showMessageDialog(this,
-                    "Click a node in the graph to view its details.",
-                    "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        controlsPanel.add(seeRegisterButton);
-
-        JButton showForefathersButton = new JButton("Show Forefathers");
-        showForefathersButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showForefathers();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showForefathersButton);
-
-        // Button to execute event for showing title holders
-        JButton showTitleHoldersButton = new JButton("Show title holders");
-        showTitleHoldersButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showTitleHolders();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showTitleHoldersButton);
-
-        // Button to execute event for showing title holders
-        JButton showGenerationButton = new JButton("Show Generation");
-        showGenerationButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showGenerationMembers();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showGenerationButton);
-
-        // Button to execute event for showing title holders
-        JButton showByNameButton = new JButton("Find by name");
-        showByNameButton.addActionListener(e -> {
-            if (jsonLoaded) {
-                showByName();
-            } else {
-                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
-            }
-        });
-        controlsPanel.add(showByNameButton);
-
+//        // Button to execute event for showing title holders
+//        JButton showByNameButton = new JButton("Find by name");
+//        showByNameButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showByName();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showByNameButton);
+//
+//    }
+        
+//        // Button to display the diagram
+//        JButton showDiagramButton = new JButton("Show Diagram");
+//        showDiagramButton.addActionListener(e -> showDiagram());
+//        controlsPanel.add(showDiagramButton);
+//        
+//       // Ensure the controlsPanel is added to the JFrame's layout
+//       add(controlsPanel, BorderLayout.SOUTH);
+//
+//       // Set the JFrame visible
+//       setVisible(true);
     }
+    
+    
+    /**
+    * Handles the action of displaying the forefathers of a selected individual.
+    * <p>
+    * This method triggers the {@code showForefathers()} method, which contains the logic 
+    * to retrieve and display the ancestors (forefathers) of the selected node in the tree.
+    * </p>
+    */    
+    public void onShowForefathers() {
+        // Aquí va tu lógica para mostrar los antepasados
+        showForefathers();
+    }
+    
+    public void setRegisterListener(RegisterListener listener) {
+    this.RegisterListener = listener;
+    }
+    /**
+    * Handles the registration process and updates the graph display.
+    * <p>
+    * This method checks if a JSON file is loaded before proceeding. If the JSON file is loaded,
+    * it updates the graph display. If not, it displays a message prompting the user to load a JSON file first.
+    * After updating the graph, it informs the user that they can interact with the nodes to view details.
+    * </p>
+    */
+    public void onRegister() {
+        // Verificar si el archivo JSON está cargado
+        if (jsonLoaded) {
+            updateGraphDisplay(null, false, null, null, null);
+       } else {
+           JOptionPane.showMessageDialog(null, "You need to Load a JSON file first! ");
+           this.show(false);
+           return;
+       }
+       JOptionPane.showMessageDialog(null,
+          "Click a node in the graph to view its details.",
+          "Info", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /**
+     * Handles the action of displaying title holders.
+     * <p>
+     * This method acts as a trigger to invoke the {@code showTitleHolders()} method,
+     * which contains the logic to retrieve and display individuals associated with specific titles.
+     * It may also include additional functionality, such as updating the graph display, 
+     * which is currently commented out.
+     * </p>
+     */
+    public void onshowTitleHolders() {
+        showTitleHolders();
+        //updateGraphDisplay(null, false, PersonLinkedList, null);  
+    }
+    
+    /**
+     * Handles the action of displaying generation members.
+     * <p>
+     * This method serves as an entry point to invoke the {@code showGenerationMembers()} method,
+     * which performs the logic for retrieving and displaying information about the members 
+     * of specific generations in the tree.
+     * </p>
+     */
+    public void onshowGenerationMembers() {
+        showGenerationMembers();
+    }
+    
+    /**
+     * Loads the tree structure and notifies the registered {@link TreeLoadListener}.
+     * <p>
+     * This method first performs the logic to load the tree using the {@code loadTree()} method.
+     * Once the tree is successfully loaded, it triggers the {@code onTreeLoaded()} method
+     * of the registered listener, if any.
+     * </p>
+     */
+    public void loadTreeLoaded() {
+        // Aquí iría la lógica para cargar el árbol
+        loadTree();
+        // Una vez que el árbol ha sido cargado, notificamos a todos los listeners registrados
+        if (listener != null) {
+            listener.onTreeLoaded();  // Llamamos al método onTreeLoaded() del listener
+        }
+    }
+    
+    /**
+     * Registers a listener to handle events related to tree loading.
+     * 
+     * @param listener the {@link TreeLoadListener} to be registered. This listener 
+     *                 will handle actions or updates triggered during the tree loading process.
+     */
+    public void setTreeLoadListener(TreeLoadListener listener) {
+        this.listener = listener;  // Guarda la referencia del listener
+    }
+    
+    public void onPersonSearch() {
+        showByName();
+    }
+    
+    public void onDiagram(){
+        showDiagram();
+    }
+
+
+    
+//        public void onPersonSearch(String name) {
+//              // Button to execute event for showing title holders
+//        JButton showByNameButton = new JButton("Find by name");
+//        showByNameButton.addActionListener(e -> {
+//            if (jsonLoaded) {
+//                showByName();
+//            } else {
+//                JOptionPane.showMessageDialog(rootPane, "You need to Load a JSON file first");
+//            }
+//        });
+//        controlsPanel.add(showByNameButton);
+//
+//    }
 
     /**
      * Triggered when the hash table is updated. Synchronizes the local hash
@@ -195,12 +335,33 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         if (result == JFileChooser.APPROVE_OPTION) {
             // Get the selected file
             File selectedFile = fileChooser.getSelectedFile();
+            
+            if (!selectedFile.exists() || !selectedFile.isFile()) {
+                JOptionPane.showMessageDialog(this, "Invalid file selected.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+            
+            if (!selectedFile.getName().toLowerCase().endsWith(".json")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid JSON file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+            
             try {
                 // Read the content of the selected file into a String
                 String jsonContent = new String(Files.readAllBytes(Paths.get(selectedFile.getAbsolutePath())));
+                
+                if (jsonContent.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "The selected JSON file is empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                }
 
                 // Load the genealogy data into the tree
                 LoadJson loadJson = new LoadJson();
+                
+                if(jsonContent != null && !table.isEmpty()){
+                    table.removeAll();    
+                }
+                
                 loadJson.loadGenealogy(jsonContent, tree);
                 jsonLoaded = true;
                 JOptionPane.showMessageDialog(rootPane, "JSON file correctly loaded");
@@ -230,13 +391,12 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             // Create the graph based on the current tree data
             Graph graph = tree.createGraph(personToLookFor, foreFathersNeeded, titleName, generationNumber, personToFind);
 
-//        System.out.println("Table size in GenealogyGUI: " + table.size());
             // If a viewer already exists, close its previous view to avoid conflicts
             if (viewer != null) {
                 try {
                     viewer.close();  // Ensure previous viewer is closed properly
                 } catch (Exception e) {
-//                System.out.println("Error closing the viewer: " + e.getMessage());
+
                 }
             }
 
@@ -274,7 +434,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     }
                 });
             } else {
-                System.out.println("Error: view is null, unable to add mouse listener.");
+
             }
 
             // Remove the old graph view and add the new one
@@ -283,10 +443,8 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             graphPanel.revalidate();
             graphPanel.repaint();
 //        } catch (NullPointerException e) {
-//            System.out.println("Null Pointer Error: " + e.getMessage());
 //            JOptionPane.showMessageDialog(this, "Unable to retrieve graph data. Please ensure the data is correctly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected Error Here: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -354,6 +512,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             JOptionPane.showMessageDialog(this, "An unexpected error occurred: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
+        
     }
 
     /**
@@ -500,6 +659,12 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                 JOptionPane.showMessageDialog(this, "Title cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            
+            // Validar que el título contenga solo letras
+            if (!titleName.matches("[a-zA-Z ]+")) {
+                JOptionPane.showMessageDialog(this, "Title can only contain letters.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             for (Person person : table.getAllPeople()) {
                 if (person.getTitle() == null) {
@@ -508,26 +673,24 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
 
                 if (person.getTitle().equalsIgnoreCase(titleName.trim())) {
                     titleHolders.addPerson(person);
-                    System.out.println("Person with title: " + person.getName() + " " + person.getTitle() + " added succesfully");
+             
                 } else {
-//                System.out.println("Person: " + person.getName() + " Person Title: " + person.getTitle() + " Introduced Title: " + titleName);
+
                 }
             }
 
             try {
                 updateGraphDisplay(null, false, titleHolders, null, null);
             } catch (Exception e) {
-                System.out.println("Exception: " + e);
+                
             }
 
             JOptionPane.showMessageDialog(this,
                     "Click a node in the graph to view its details.",
                     "Info", JOptionPane.INFORMATION_MESSAGE);
         } catch (NullPointerException e) {
-            System.out.println("NullPointerException: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Person data not properly initialized.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected error raro: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred, Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -561,9 +724,23 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     JOptionPane.QUESTION_MESSAGE
             );
 
-            if (personName == null || personName.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Name cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            // Handle the case where the user closed the input dialog or clicked "Cancel"
+            if (personName == null) {
+                JOptionPane.showMessageDialog(this, "Operation cancelled. No name entered.", "Info", JOptionPane.INFORMATION_MESSAGE);
                 return;
+            }
+            
+            // Check if the name is empty or contains only spaces
+            if (personName.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Name cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+                return; 
+            }
+            
+            // Check if the name contains only valid characters (alphabet and spaces)
+            if (!personName.matches("[a-zA-Z ]+")) {
+                JOptionPane.showMessageDialog(this, "Invalid name format. Only alphabets and spaces are allowed.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+                
             }
 
             // Search for the person in the HashTable
@@ -582,13 +759,40 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
                     "Click a node in the graph to view its details.",
                     "Info", JOptionPane.INFORMATION_MESSAGE);
         } catch (NullPointerException e) {
-            System.out.println("NullPointerException: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Person data not found. Please ensure the person exists in the genealogy.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
+    
+   /**
+    * Displays a new window containing a zoomable diagram (image).
+    * 
+    * The image can be zoomed in or out using the mouse scroll wheel.
+    */
+   private void showDiagram() {
+     // Create a new JFrame to display the image
+     JFrame diagramFrame = new JFrame("Diagram Viewer");
+     diagramFrame.setSize(800, 600);
+     diagramFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+     diagramFrame.setLocationRelativeTo(null);
+
+     // Add the ZoomableImagePanel with the image
+     try {
+        ZoomableImagePanel zoomPanel = new ZoomableImagePanel("class_diagram/class_diagram.png"); // Path to the image file
+        JScrollPane scrollPane = new JScrollPane(zoomPanel); // Add scrollbars for larger images
+        diagramFrame.add(scrollPane);
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Could not load the image: " + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+     }
+
+     diagramFrame.setVisible(true);
+  }
+
+
 
     /**
      * Handles the logic when a node in the genealogy graph is clicked.
@@ -618,7 +822,6 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             // Retrieve node coordinates in graph units (GU)
             Object xyzObject = node.getAttribute("xyz");
             if (xyzObject == null) {
-//                            System.out.println("Node " + node.getId() + " position is null. Skipping.");
                 continue;
             }
 
@@ -631,15 +834,12 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             double pixelX = pixels.x;
             double pixelY = pixels.y;
 
-//                        System.out.printf("Node %s: Graph position (%.3f, %.3f) --> Pixel position (%.0f, %.0f)%n",
 //                                node.getId(), nodeX, nodeY, pixelX, pixelY);
             // Calculate the distance between the click and the node in pixel space
             double distance = Math.sqrt(Math.pow(e.getX() - pixelX, 2) + Math.pow(e.getY() - pixelY, 2));
-//                        System.out.println("Distance from click to node " + node.getId() + ": " + distance);
 
             // If the distance is within the threshold, change the node's color
             if (distance < threshold) {
-//                            System.out.println("Node " + node.getId() + " clicked. Changing color to green.");
                 node.setAttribute("ui.style", "fill-color: green;");
                 Person person = table.get(node.getId());
                 String details = person.getDetailsByName(person.getName());
@@ -651,7 +851,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
         }
 
         if (!nodeFound) {
-            System.out.println("No node found close to the click position.");
+
         }
     }
 

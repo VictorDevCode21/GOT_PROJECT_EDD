@@ -71,26 +71,30 @@ public class GenericLinkedList<T> {
     public void printList() {
         GenericNode<T> current = getFirst();
         while (current != null) {
-            System.out.println(current.getData());
             current = current.getNext();
         }
     }
 
     /**
+     * Retrieves the first node of the linked list.
      * @return the first
+     * 
      */
     public GenericNode<T> getFirst() {
         return first;
     }
 
     /**
+     * Sets the first node of the linked list.
      * @param first the first to set
+     * 
      */
     public void setFirst(GenericNode<T> first) {
         this.first = first;
     }
 
     /**
+     * Retrieves the last node of the linked list.
      * @return the last
      */
     public GenericNode<T> getLast() {
@@ -98,6 +102,7 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Sets the last node of the linked list.
      * @param last the last to set
      */
     public void setLast(GenericNode<T> last) {
@@ -105,6 +110,7 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Retrieves the current size of the linked list.
      * @return the size
      */
     public int getSize() {
@@ -112,6 +118,7 @@ public class GenericLinkedList<T> {
     }
 
     /**
+     * Updates the size of the linked list.
      * @param size the size to set
      */
     public void setSize(int size) {

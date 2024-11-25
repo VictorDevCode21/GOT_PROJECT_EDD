@@ -84,7 +84,7 @@ public class LinkedList {
     /**
      * Removes and returns the first element of the LinkedList.
      *
-     * @return the removed element (Entry<String, Person>)
+     * @return the removed element (Entry&lt;String, Person&gt;)
      * @throws IllegalStateException if the list is empty
      */
     public Entry<String, Person> removeFirst() {
@@ -146,9 +146,7 @@ public class LinkedList {
     public void print() {
         Node current = first;
         while (current != null) {
-            System.out.print(current.getValue().getKey() + " -> ");
             current = current.getNext();
         }
-        System.out.println("null");
     }
 }

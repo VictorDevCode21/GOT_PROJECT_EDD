@@ -31,6 +31,11 @@ public class Person {
      * @param mother The name of the person's mother.
      * @param fate The fate or notes about the person.
      * @param ofHisName The "Of his name" value for the person.
+     * @param eyesColor the person's eye color
+     * @param hairColor the person's hair color
+     * @param notes additional information about the person
+     * @param wedTo name of the person's partner
+     * @param generation number of the family generation to which the person belongs
      * @param children A list of the person's children.
      */
     public Person(String name, String title, String nickname, String father, String mother, String fate, String ofHisName, String eyesColor, String hairColor, String notes, String wedTo, Integer generation ,PersonLinkedList children) {
@@ -65,11 +70,22 @@ public class Person {
 
         private int currentIndex = 0;
 
+       /**
+        * Checks if there are more children to iterate over.
+        *
+        * @return {@code true} if there are more children, {@code false} otherwise
+        */
         @Override
         public boolean hasNext() {
             return currentIndex < getChildren().size();
         }
 
+        
+       /**
+        * Retrieves the next child in the collection.
+        * 
+        * @return The name of the next child
+        */
         @Override
         public String next() {
             if (hasNext()) {
@@ -189,17 +205,13 @@ public class Person {
         }
 
         String newChildFirstName = getFirstName(childName);
-//        System.out.println("Trying to add: " + childName);
 
         PersonLinkedList currentChildren = parent.getChildren();
-//        System.out.println("Showing father: " + parent.getName());
         if (currentChildren == null) {
             return null; // No children list means no duplicates
         }
 
-//        System.out.println("Showing children: ");
         for (int i = 0; i < currentChildren.size(); i++) {
-//            System.out.println("lista de hijos: " + currentChildren.get(i));
         }
 
         // Check for duplicates
@@ -209,7 +221,6 @@ public class Person {
 
             // If duplicate is found, remove the existing child from both the list and HashTable
             if (newChildFirstName.equalsIgnoreCase(existingChildFirstName)) {
-//                System.out.println("Removed duplicate: " + currentChild.toLowerCase() + " his father is: " +  parent.getName());
                 return currentChild.toLowerCase(); // A duplicate was found and removed from both the list and HashTable
             }
         }
@@ -218,6 +229,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the name of the person.
      * @return the name
      */
     public String getName() {
@@ -225,6 +237,7 @@ public class Person {
     }
 
     /**
+     * Sets the name of the person.
      * @param name the name to set
      */
     public void setName(String name) {
@@ -232,6 +245,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the title of the person.
      * @return the title
      */
     public String getTitle() {
@@ -239,6 +253,7 @@ public class Person {
     }
 
     /**
+     * Sets the title of the person.
      * @param title the title to set
      */
     public void setTitle(String title) {
@@ -246,6 +261,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the nickname of the person.
      * @return the nickname
      */
     public String getNickname() {
@@ -253,6 +269,7 @@ public class Person {
     }
 
     /**
+     * Sets the nickname of the person.
      * @param nickname the nickname to set
      */
     public void setNickname(String nickname) {
@@ -260,6 +277,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the father of the person.
      * @return the father
      */
     public String getFather() {
@@ -267,6 +285,7 @@ public class Person {
     }
 
     /**
+     * Sets the name of the person's father.
      * @param father the father to set
      */
     public void setFather(String father) {
@@ -274,6 +293,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the mother of the person.
      * @return the mother
      */
     public String getMother() {
@@ -281,6 +301,7 @@ public class Person {
     }
 
     /**
+     * Sets the name of the person's mother.
      * @param mother the mother to set
      */
     public void setMother(String mother) {
@@ -288,6 +309,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the fate of the person.
      * @return the fate
      */
     public String getFate() {
@@ -295,6 +317,7 @@ public class Person {
     }
 
     /**
+     * Sets the fate of the person.
      * @param fate the fate to set
      */
     public void setFate(String fate) {
@@ -302,6 +325,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the children of the person.
      * @return the children
      */
     public PersonLinkedList getChildren() {
@@ -309,6 +333,7 @@ public class Person {
     }
 
     /**
+     * Sets the children of the person.
      * @param children the children to set
      */
     public void setChildren(PersonLinkedList children) {
@@ -316,6 +341,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the "of His Name" title, indicating the lineage.
      * @return the ofHisName
      */
     public String getOfHisName() {
@@ -323,6 +349,7 @@ public class Person {
     }
 
     /**
+     * Sets the "of His Name" title for the person.
      * @param ofHisName the ofHisName to set
      */
     public void setOfHisName(String ofHisName) {
@@ -330,6 +357,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the eye color of the person.
      * @return the eyesColor
      */
     public String getEyesColor() {
@@ -337,6 +365,7 @@ public class Person {
     }
 
     /**
+     * Sets the eye color of the person.
      * @param eyesColor the eyesColor to set
      */
     public void setEyesColor(String eyesColor) {
@@ -344,6 +373,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the hair color of the person.
      * @return the hairColor
      */
     public String getHairColor() {
@@ -351,6 +381,7 @@ public class Person {
     }
 
     /**
+     * Sets the hair color of the person.
      * @param hairColor the hairColor to set
      */
     public void setHairColor(String hairColor) {
@@ -358,6 +389,7 @@ public class Person {
     }
 
     /**
+     * Retrieves additional notes about the person.
      * @return the notes
      */
     public String getNotes() {
@@ -365,6 +397,7 @@ public class Person {
     }
 
     /**
+     * Sets additional notes for the person.
      * @param notes the notes to set
      */
     public void setNotes(String notes) {
@@ -372,6 +405,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the name of the person the individual is wed to.
      * @return the wedTo
      */
     public String getWedTo() {
@@ -379,6 +413,7 @@ public class Person {
     }
 
     /**
+     * Sets the name of the person the individual is wed to.
      * @param wedTo the wedTo to set
      */
     public void setWedTo(String wedTo) {
@@ -386,6 +421,7 @@ public class Person {
     }
 
     /**
+     * Retrieves the generation number of the person.
      * @return the generation
      */
     public Integer getGeneration() {
@@ -393,6 +429,7 @@ public class Person {
     }
 
     /**
+     * Sets the generation number for the person.
      * @param generation the generation to set
      */
     public void setGeneration(Integer generation) {

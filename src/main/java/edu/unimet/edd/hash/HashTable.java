@@ -54,6 +54,17 @@ public class HashTable {
 
     }
 
+    
+   /**
+    * Returns the singleton instance of the HashTable class. If the instance does
+    * not exist, it creates a new one and returns it.
+    * <p>
+    * This method ensures that only one instance of the HashTable is created and
+    * reused throughout the application.
+    * </p>
+    *
+    * @return the singleton instance of the HashTable.
+    */
     public static HashTable getInstance() {
         if (instance == null) {
             instance = new HashTable();
@@ -292,6 +303,25 @@ public class HashTable {
     public int size() {
         return size;
     }
+    
+    /**
+     * Checks if the hash table is empty.
+     *
+     * @return true if the table is empty, false otherwise.
+     */
+    public boolean isEmpty() {
+        return size == 0;
+    }
+    
+    /**
+     * Clears all entries from the hash table.
+     */
+    public void removeAll() {
+        for (int i = 0; i < table.length; i++) {
+            table[i] = new LinkedList(); // Replace each bucket with a new empty LinkedList
+        }
+        size = 0; // Reset the size to zero
+    }
 
     /**
      * Retrieves all people stored in the hash table.
@@ -408,11 +438,4 @@ public class HashTable {
         }
         return false; // Key not found
     }
-
-//    public void printTableContents() {
-//        System.out.println("HashTable contents:");
-//        for (Person person : table.getAllPeople()) {
-//            System.out.println("- " + person.getName());
-//        }
-//    }
 }
