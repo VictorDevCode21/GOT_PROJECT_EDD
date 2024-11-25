@@ -5,10 +5,15 @@
 package edu.unimet.edd.listeners;
 
 /**
- *
+ *Listener interface for registration events.
+ * 
  * @author Chantal
  */
 public interface RegisterListener {
+    
+    /**
+     * Triggered when a registration event occurs.
+     */
     void onRegister();
     
 }

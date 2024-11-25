@@ -5,9 +5,14 @@
 package edu.unimet.edd.listeners;
 
 /**
- *
+ *Listener interface for person search events.
+ * 
  * @author Chantal
  */
 public interface PersonSearch {
+    
+    /**
+     * Triggered when a person search is performed.
+     */
     void onPersonSearch();
 }

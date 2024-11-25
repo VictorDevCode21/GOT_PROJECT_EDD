@@ -5,10 +5,15 @@
 package edu.unimet.edd.listeners;
 
 /**
- *
+ *Listener interface for showing forefathers.
+ * 
  * @author Chantal
  */
 public interface ShowForefatherListener {
+    
+    /**
+     * Triggered when the forefathers are to be displayed.
+     */
     void onShowForefathers();
     
 }
