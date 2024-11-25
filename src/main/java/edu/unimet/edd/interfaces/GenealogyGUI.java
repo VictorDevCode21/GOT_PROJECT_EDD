@@ -545,7 +545,7 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             // Prompt the user to input a name or part of a name
             String name = JOptionPane.showInputDialog(
                     this,
-                    "Introduce a name: ",
+                    "Introduce a Firstname: ",
                     "Find by name",
                     JOptionPane.QUESTION_MESSAGE
             );
@@ -562,9 +562,11 @@ public class GenealogyGUI extends JFrame implements HashTableListener {
             }
 
             // Search for matches in the tree
+            System.out.println("1");
             GenericLinkedList coincidences = tree.findPersonByName(name);
 
             if (coincidences == null || coincidences.getSize() == 0) {
+                System.out.println("2");
                 JOptionPane.showMessageDialog(
                         this,
                         "No matches found for the name: " + name,
