@@ -298,36 +298,60 @@ public class InterfaceGOT extends javax.swing.JFrame {
     }//GEN-LAST:event_ExitMouseExited
 
     private void RecordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RecordActionPerformed
-        if (genealogyGUI == null) {
+
+        try {
+            genealogyGUI.onRegister();
+        } catch (NullPointerException n) {
             JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "There has been a mistake, please try again.");
         }
-        genealogyGUI.onRegister();
     }//GEN-LAST:event_RecordActionPerformed
 
     private void searchNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchNameActionPerformed
-        genealogyGUI.onPersonSearch();
+        try {
+            genealogyGUI.onPersonSearch();
+        } catch (NullPointerException n) {
+            JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "There has been a mistake, please try again.");
+        }
+
+
     }//GEN-LAST:event_searchNameActionPerformed
 
     private void showAncestorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAncestorsActionPerformed
-        if (genealogyGUI == null) {
+        try {
+            genealogyGUI.onShowForefathers();
+        } catch (NullPointerException n) {
             JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "There has been a mistake, please try again.");
         }
-        genealogyGUI.onShowForefathers();
+
     }//GEN-LAST:event_showAncestorsActionPerformed
 
     private void searchTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTitleActionPerformed
-        if (genealogyGUI == null) {
+        try {
+            genealogyGUI.onshowTitleHolders();
+        } catch (NullPointerException n) {
             JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "There has been a mistake, please try again.");
         }
-        genealogyGUI.onshowTitleHolders();
+
     }//GEN-LAST:event_searchTitleActionPerformed
 
     private void membersGenerationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_membersGenerationActionPerformed
-        if (genealogyGUI == null) {
+        try {
+            genealogyGUI.onshowGenerationMembers();
+        } catch (NullPointerException n) {
             JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "There has been a mistake, please try again.");
         }
 
-        genealogyGUI.onshowGenerationMembers();
+
     }//GEN-LAST:event_membersGenerationActionPerformed
 
     private void loadTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadTreeActionPerformed
@@ -349,7 +373,15 @@ public class InterfaceGOT extends javax.swing.JFrame {
     }//GEN-LAST:event_loadTreeActionPerformed
 
     private void DiagramActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DiagramActionPerformed
-        genealogyGUI.onDiagram();
+        try {
+            genealogyGUI.onDiagram();;
+        } catch (NullPointerException n) {
+            JOptionPane.showMessageDialog(rootPane, "Please, load Tree first");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "There has been a mistake, please try again.");
+        }
+
+
     }//GEN-LAST:event_DiagramActionPerformed
 
     /**
