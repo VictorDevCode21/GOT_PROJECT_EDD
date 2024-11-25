@@ -5,10 +5,15 @@
 package edu.unimet.edd.listeners;
 
 /**
- *
+ *Listener interface for tree loading events.
+ * 
  * @author Chantal
  */
 public interface TreeLoadListener {
+    
+    /**
+     * Triggered when the tree has been loaded.
+     */
     void onTreeLoaded();
     
 }

@@ -5,9 +5,14 @@
 package edu.unimet.edd.listeners;
 
 /**
- *
+ * Listener interface for showing generation members.
+ * 
  * @author Chantal
  */
 public interface showGenerationMembersListener {
+    
+    /**
+     * Triggered when the generation members are to be displayed.
+     */
     void onshowGenerationMembers();
 }

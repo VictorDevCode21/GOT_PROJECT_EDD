@@ -5,10 +5,15 @@
 package edu.unimet.edd.listeners;
 
 /**
- *
+ *Listener interface for diagram-related events.
+ * 
  * @author Chantal
  */
 public interface DiagramListener {
+    
+    /**
+     * Triggered when a diagram event occurs.
+     */
     void onDiagram();
     
 }
